@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="@golem.csse.rose-hulman.edu" uuid="f5058652-2398-4374-a4df-288852725690">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="MSSQL" exact-version="0" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>hamilter</user-name>
+      <schema-mapping />
+    </data-source>
+    <data-source name="CalendarDB@golem.csse.rose-hulman.edu" uuid="9cca0c37-924c-4a81-94ee-6c13a07ded0e">
+      <database-info product="Microsoft SQL Server" version="12.00.4232" jdbc-version="4.2" driver-name="Microsoft JDBC Driver 7.4 for SQL Server" driver-version="7.4.1.0" dbms="MSSQL" exact-version="12.0.4232" exact-driver-version="7.4">
+        <extra-name-characters>$#@</extra-name-characters>
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>SodaBaseUserhamilter30</user-name>
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="database" qname="CalendarDB">
+            <node kind="schema">
+              <name qname="db_datareader" />
+              <name qname="db_datawriter" />
+            </node>
+          </node>
+        </introspection-scope>
+      </schema-mapping>
+    </data-source>
+  </component>
+</project>

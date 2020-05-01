@@ -1,7 +1,13 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Vector;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import us.k5n.ical.ICalendarParser;
 
 
 /**
@@ -23,5 +29,32 @@ public class Main {
 				
 		File iCalFile = fc.getSelectedFile();
 		System.out.println("You selected the file " + iCalFile.getName());
+		
+		k5n(iCalFile);
+		
+		
+	}
+	
+	private static void k5n(File calfile) {
+		ICalendarParser icp = new ICalendarParser(0);
+		BufferedReader br = null;
+		
+		try {
+			br = new BufferedReader(new FileReader(calfile));
+			icp.parse(br);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(br != null)
+				try {
+					br.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		
+		System.out.println(icp.toString());
 	}
 }

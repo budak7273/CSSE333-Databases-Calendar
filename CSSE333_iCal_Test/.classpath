@@ -2,5 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/budakrc/Documents/Git/CSSE333-Databases-Calendar/k5n-all-src-0.4.4/dist/lib/k5n-ical-0.4.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/budakrc/Documents/Git/CSSE333-Databases-Calendar/k5n-all-src-0.4.4/dist/lib/k5n-calendarpanel-0.4.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/budakrc/Documents/Git/CSSE333-Databases-Calendar/k5n-all-src-0.4.4/dist/k5n-journal-0.4.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

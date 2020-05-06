@@ -1,0 +1,2 @@
+INSERT INTO [User] ([Username], [Name], [Timezone], [Password])
+VALUES ('DemoUser', 'Demo', 5.0, 0x2B89C2954E18E15759545A421D243E251784FA009) --password binary is random junk; this user basically can't be logged into

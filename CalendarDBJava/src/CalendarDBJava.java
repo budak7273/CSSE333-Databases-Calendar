@@ -15,9 +15,23 @@ public class CalendarDBJava extends JFrame {
     private Color monthViewDayOfMonthColor = Color.WHITE;
     private ArrayList<Assignment> assignmentList;
 
+    private String username;
+    private String password; //security vulnerability to store password in memory
+    
+    private static final boolean DEBUG_LOGIN = true; //flip this to true to not have to enter login credentials (for testing)
+    
     public CalendarDBJava() {
         super("CalendarDB UI");
 
+        //User login
+        if(DEBUG_LOGIN) {
+        	username = "SodaBaseUserhamilter30";
+        	password = "Password123";
+        } else {
+        	username = JOptionPane.showInputDialog("Enter your username.");
+        	password = JOptionPane.showInputDialog("Enter your password.");
+        }
+        
         mContainer = getContentPane();
         mContainer.setLayout(new FlowLayout());
         mContainer.setBackground(monthViewBackgroundColor);
@@ -44,7 +58,7 @@ public class CalendarDBJava extends JFrame {
     public void paint(Graphics g) {
         super.paint(g);
         assignmentService = new AssignmentService(dbConnectService);
-        assignmentList = assignmentService.getAllAssignmentsForUser("test1"); //TODO
+        assignmentList = assignmentService.getAllAssignmentsForUser(username, password); //TODO
         drawMonthView(g, 1400, 800, 25, 25+22, 5, 5, 3, 30);
     }
 

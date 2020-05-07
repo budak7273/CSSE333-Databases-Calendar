@@ -15,9 +15,9 @@ public class AssignmentService {
         this.dbService = dbService;
     }
 
-    public ArrayList<Assignment> getAllAssignmentsForUser(String username) {
+    public ArrayList<Assignment> getAllAssignmentsForUser(String username, String password) {
         ArrayList<Assignment> assignments = new ArrayList<>();
-        dbService.connect("SodaBaseUserhamilter30", "Password123"); //TODO: Get a real app account
+        dbService.connect(username, password);
         Connection con = dbService.getConnection();
 
         Statement state = null;

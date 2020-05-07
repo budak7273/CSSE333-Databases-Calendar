@@ -60,4 +60,10 @@ public class Assignment {
     public int getImportSourceID() {
         return ImportSourceID;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Assignment(Name=%s, Date=%s)", this.EventName, this.EventDate);
+
+    }
 }

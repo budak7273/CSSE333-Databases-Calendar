@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class CalendarDBJava extends JFrame {
@@ -25,8 +26,8 @@ public class CalendarDBJava extends JFrame {
 
         //User login
         if(DEBUG_LOGIN) {
-        	username = "SodaBaseUserhamilter30";
-        	password = "Password123";
+        	username = "DemoUser";
+        	password = "DemoPass";
         } else {
         	username = JOptionPane.showInputDialog("Enter your username.");
         	password = JOptionPane.showInputDialog("Enter your password.");
@@ -96,17 +97,17 @@ public class CalendarDBJava extends JFrame {
     }
 
     private void drawDayEventListMonthView(Graphics g, int x, int y, int width, int height, int maxEventsDisplayed, int dayOfMonth) {
-
         for (Assignment a : assignmentList) {
-            if (a.getEventDate().equals(new Date(2020, 4, dayOfMonth)))
-            drawAssignment(g, a, x + 5, y + 30, width - 15, height / maxEventsDisplayed);
+            System.out.println(a);
+            if (a.getEventDate().getYear() == 2020-1900 && a.getEventDate().getMonth() == 5-1 && a.getEventDate().getDate() == dayOfMonth)
+                drawAssignment(g, a, x + 5, y + 30, width - 15, height / maxEventsDisplayed);
         }
     }
 
     private void drawAssignment(Graphics g, Assignment assignment, int x, int y, int width, int height) {
         g.setColor(new Color(assignment.getEventSpecificColor()));
         g.fillRect(x, y, width, height);
-        g.setColor(Color.BLACK);
+        g.setColor(Color.WHITE);
         g.drawString(assignment.getEventName(), x, y + 20);
     }
 

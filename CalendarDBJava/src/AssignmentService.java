@@ -17,13 +17,13 @@ public class AssignmentService {
 
     public ArrayList<Assignment> getAllAssignmentsForUser(String username, String password) {
         ArrayList<Assignment> assignments = new ArrayList<>();
-        dbService.connect(username, password);
+        System.out.println("connect returned " + dbService.connect("appUserCalendarDB", "Password123"));
         Connection con = dbService.getConnection();
 
         Statement state = null;
         try {
             state = con.createStatement();
-            String query = "SELECT AssignmentID, EventName, EventProgress, Type, EventSpecificColor, ParentClassCalendarID, ParentClassSectionID, ImportSourceID, CalendarColor, ClassTime, ClassName, ParentUserID AS UserID\n" +
+            String query = "SELECT AssignmentID, EventName, EventDate, EventProgress, Type, EventSpecificColor, ParentClassCalendarID, ParentClassSectionID, ImportSourceID, CalendarColor, ClassTime, ClassName, ParentUserID AS UserID\n" +
                     "FROM Assignment A\n" +
                     "INNER JOIN ClassCalendar CC\n" +
                     "ON A.ParentClassCalendarID = CC.ClassCalendarID\n" +
@@ -44,8 +44,8 @@ public class AssignmentService {
                 assignments.add(thisAssignment);
             }
             //TODO Add Data to Database, Remove following lines:
-            Assignment dummyAssignment = new Assignment(1,"Dummy Event", new Date(2020, 4,28), 20, "Exam", 0x66FF69, 22, 323, 45);
-            assignments.add(dummyAssignment);
+//            Assignment dummyAssignment = new Assignment(1,"Dummy Event", new Date(2020, 4,28), 20, "Exam", 0x66FF69, 22, 323, 45);
+//            assignments.add(dummyAssignment);
 
         } catch (SQLException e) {
             e.printStackTrace();

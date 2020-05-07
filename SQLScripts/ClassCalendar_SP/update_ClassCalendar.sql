@@ -44,3 +44,13 @@ BEGIN CATCH
     SELECT ERROR_MESSAGE() AS ErrorMessage;  
 END CATCH;  
 GO 
+
+EXEC [update_ClassCalendar] 
+	@ClassCalendarID_1 = 6,
+	@CalendarColor_1 = 222222,
+	@ClassTime_1 = '8:00',
+	@ClassName_1 = 'CSSE330',
+	@ParentUserID_1 = 'DemoUser'
+	
+
+select * FROM ClassCalendar

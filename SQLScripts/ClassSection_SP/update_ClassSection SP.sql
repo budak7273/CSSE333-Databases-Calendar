@@ -16,41 +16,38 @@ GO
 -- =============================================
 -- Author:		Thomas Nandola
 -- Create date: May 6th, 2020
--- Description:	Procedure to Update the Class Calendar Table.
+-- Description:	Procedure to Update the ClassSection Table.
 -- =============================================
-CREATE PROCEDURE update_ClassCalendar(
-@ClassCalendarID_1 int,
-@CalendarColor_1 int,
-@ClassTime_1 time,
-@ClassName_1 nvarchar(20),
+CREATE PROCEDURE update_ClassSection (
+@ClassSectionID_1 int,
+@CourseNumber_1 varchar(8), 
+@SectionNumber_1 tinyint,
+@ClassName_1 nvarchar(20), 
+@IsPrivate_1 bit, 
+@SchoolYear_1 smallint, 
 @ParentUserID_1 varchar(20),
 @Msg nvarchar(MAX) = null OUTPUT
 )
 AS
 BEGIN TRY
-	UPDATE ClassCalendar
+	UPDATE ClassSection
 	SET
-
-	CalendarColor = @CalendarColor_1,
-	ClassTime = @ClassTime_1,
+	CourseNumber = @CourseNumber_1,
+	SectionNumber = @SectionNumber_1,
 	ClassName = @ClassName_1,
+	IsPrivate = @IsPrivate_1,
+	SchoolYear = @SchoolYear_1,
 	ParentUserID = @ParentUserID_1
-	
-	WHERE ClassCalendarID = @ClassCalendarID_1
-		SET @Msg = 'Class Calendar Updated Successfully!'
+
+	WHERE ClassSectionID = @ClassSectionID_1
+		SET @Msg = 'ClassSection Updated Successfully!'
 
 END TRY
 BEGIN CATCH  
     SELECT ERROR_MESSAGE() AS ErrorMessage;  
 END CATCH;  
-GO 
+GO
 
-EXEC [update_ClassCalendar] 
-	@ClassCalendarID_1 = 6,
-	@CalendarColor_1 = 222222,
-	@ClassTime_1 = '8:00',
-	@ClassName_1 = 'CSSE330',
-	@ParentUserID_1 = 'DemoUser'
-	
+EXEC update_ClassSection 3, 'CSSE333', 02, 'Databases', 0, 2020, 'DemoUser'
+select * from ClassSection
 
-select * FROM ClassCalendar

@@ -1,7 +1,3 @@
-USE CalendarDB
-GO
-DROP PROCEDURE insert_ClassCalendar
-GO
 -- ================================================
 -- Template generated from Template Explorer using:
 -- Create Procedure (New Menu).SQL
@@ -20,36 +16,22 @@ GO
 -- =============================================
 -- Author:		Thomas Nandola
 -- Create date: May 6th, 2020
--- Description:	Procedure to Insert into the ClassCalendar Table.
+-- Description:	Procedure to Delete from the ClassSection Table.
 -- =============================================
-CREATE PROCEDURE insert_ClassCalendar(
-	@CalendarColor_1 int,
-	@ClassTime_1 time,
-	@ClassName_1 nvarchar(20),
-	@ParentUserID_1 varchar(20))
-
+CREATE PROCEDURE delete_ClassSection(
+@ClassSectionID_1 int,
+@Msg nvarchar(MAX) = null OUTPUT
+)
 AS
-BEGIN
-	INSERT INTO ClassCalendar(
-	CalendarColor,
-	ClassTime,
-	ClassName,
-	ParentUserID)
+BEGIN TRY
+	DELETE FROM ClassSection
+	WHERE ClassSectionID = @ClassSectionID_1
 
-	VALUES(
-	@CalendarColor_1,
-	@ClassTime_1,
-	@ClassName_1,
-	@ParentUserID_1)
-END
+	SET @Msg = 'Class Section Deleted Successfully'
 
+END TRY
+BEGIN CATCH  
+    SELECT ERROR_MESSAGE() AS ErrorMessage;  
+END CATCH;  
+GO 
 
-
-EXEC [insert_ClassCalendar] 
-	@CalendarColor_1 = 11111,
-	@ClassTime_1 = '8:00',
-	@ClassName_1 = 'CSSE330',
-	@ParentUserID_1 = 'DemoUser'
-	
-
-select * FROM ClassCalendar

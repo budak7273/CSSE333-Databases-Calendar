@@ -11,6 +11,8 @@ public class DatabaseConnectionService {
 
 	private String databaseName;
 	private String serverName;
+	
+	private static int connectionsOpen = 0;
 
 	public DatabaseConnectionService(String serverName, String databaseName) {
 		//DO NOT CHANGE THIS METHOD
@@ -26,12 +28,15 @@ public class DatabaseConnectionService {
 				.replace("${dbName}", databaseName)
 				.replace("${user}", user)
 				.replace("${pass}", pass);
-
+		System.out.print("Attempting to connect to database with username " + user + "...");
 		try {
 			connection = DriverManager.getConnection(connectionURL);
+			System.out.println("Connection successful.");
+			connectionsOpen++;
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println("Connection failed.");
 			return false;
 		}
 	}
@@ -47,6 +52,8 @@ public class DatabaseConnectionService {
 			connection.close();
 		} catch (SQLException ignored) {
 		}
+		connectionsOpen--;
+		System.out.println("Connection closed. " + connectionsOpen + " connections remain open.");
 	}
 
 }

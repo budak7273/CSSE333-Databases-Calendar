@@ -1,3 +1,7 @@
+USE CalendarDB
+GO
+DROP PROCEDURE insert_ClassCalendar
+GO
 -- ================================================
 -- Template generated from Template Explorer using:
 -- Create Procedure (New Menu).SQL
@@ -19,7 +23,6 @@ GO
 -- Description:	Procedure to Insert into the ClassCalendar Table.
 -- =============================================
 CREATE PROCEDURE insert_ClassCalendar(
-	@ClassCalendarID_1 int,
 	@CalendarColor_1 int,
 	@ClassTime_1 time,
 	@ClassName_1 nvarchar(20),
@@ -28,16 +31,25 @@ CREATE PROCEDURE insert_ClassCalendar(
 AS
 BEGIN
 	INSERT INTO ClassCalendar(
-	ClassCalendarID,
 	CalendarColor,
 	ClassTime,
 	ClassName,
 	ParentUserID)
 
 	VALUES(
-	@ClassCalendarID_1,
 	@CalendarColor_1,
 	@ClassTime_1,
 	@ClassName_1,
 	@ParentUserID_1)
 END
+
+
+
+EXEC [insert_ClassCalendar] 
+	@CalendarColor_1 = 11111,
+	@ClassTime_1 = '8:00',
+	@ClassName_1 = 'CSSE330',
+	@ParentUserID_1 = 'DemoUser'
+	
+
+select * FROM ClassCalendar

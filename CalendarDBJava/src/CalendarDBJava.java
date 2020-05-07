@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class CalendarDBJava extends JFrame {
-    AssignmentService assignmentService;
+    private AssignmentService assignmentService;
+    private DatabaseConnectionService dbConnectService;
     private Container mContainer;
 
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
@@ -22,6 +23,17 @@ public class CalendarDBJava extends JFrame {
         mContainer.setBackground(monthViewBackgroundColor);
         setSize(1450, 872);
         setVisible(true);
+        
+        dbConnectService = new DatabaseConnectionService("golem.csse.rose-hulman.edu", "CalendarDB");
+        
+        //close DB connection on exit
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+            	dbConnectService.closeConnection();
+            	System.exit(0);
+            }
+        });
     }
 
     public static void main(String[] args) {
@@ -31,7 +43,7 @@ public class CalendarDBJava extends JFrame {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        assignmentService = new AssignmentService(new DatabaseConnectionService("golem.csse.rose-hulman.edu", "CalendarDB"));
+        assignmentService = new AssignmentService(dbConnectService);
         assignmentList = assignmentService.getAllAssignmentsForUser("test1"); //TODO
         drawMonthView(g, 1400, 800, 25, 25+22, 5, 5, 3, 30);
     }
@@ -84,6 +96,7 @@ public class CalendarDBJava extends JFrame {
         g.drawString(assignment.getEventName(), x, y + 20);
     }
 
+    
 
 
 }

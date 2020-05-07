@@ -16,7 +16,6 @@ public class AssignmentService {
     }
 
     public ArrayList<Assignment> getAllAssignmentsForUser(String username) {
-        //TO DONE: Task 2
         ArrayList<Assignment> assignments = new ArrayList<>();
         dbService.connect("SodaBaseUserhamilter30", "Password123"); //TODO: Get a real app account
         Connection con = dbService.getConnection();
@@ -58,16 +57,9 @@ public class AssignmentService {
                 e.printStackTrace();
             }
         }
-
+        
+        dbService.closeConnection();
         return assignments;
-
-
-//		ArrayList<String> sodas = new ArrayList<String>();
-//		sodas.add("FirstSoda");
-//		sodas.add("SecondSoda");
-//		sodas.add("ThirdSoda");
-//		sodas.add("LastSoda");
-//		return sodas;
     }
 
 }

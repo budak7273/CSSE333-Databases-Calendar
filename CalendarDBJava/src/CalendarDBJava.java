@@ -7,6 +7,7 @@ import java.util.Date;
 public class CalendarDBJava extends JFrame {
     private AssignmentService assignmentService;
     private DatabaseConnectionService dbConnectService;
+    private ImportHandler importHandler;
     private Container mContainer;
 
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
@@ -40,6 +41,7 @@ public class CalendarDBJava extends JFrame {
         setVisible(true);
         
         dbConnectService = new DatabaseConnectionService("golem.csse.rose-hulman.edu", "CalendarDB");
+        importHandler = new ImportHandler(dbConnectService);
         
         //close DB connection on exit
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -51,7 +53,8 @@ public class CalendarDBJava extends JFrame {
         });
     }
 
-    public static void main(String[] args) {
+    @SuppressWarnings("unused")
+	public static void main(String[] args) {
         CalendarDBJava application = new CalendarDBJava();
     }
 
@@ -61,6 +64,7 @@ public class CalendarDBJava extends JFrame {
         assignmentService = new AssignmentService(dbConnectService);
         assignmentList = assignmentService.getAllAssignmentsForUser(username, password); //TODO
         drawMonthView(g, 1400, 800, 25, 25+22, 5, 5, 3, 30);
+        importHandler.promptICalImport();
     }
 
     private void drawMonthView(Graphics g, int monthWidth, int monthHeight, int leftOffset, int topOffset,
@@ -98,7 +102,7 @@ public class CalendarDBJava extends JFrame {
 
     private void drawDayEventListMonthView(Graphics g, int x, int y, int width, int height, int maxEventsDisplayed, int dayOfMonth) {
         for (Assignment a : assignmentList) {
-            System.out.println(a);
+            //System.out.println(a);
             if (a.getEventDate().getYear() == 2020-1900 && a.getEventDate().getMonth() == 5-1 && a.getEventDate().getDate() == dayOfMonth)
                 drawAssignment(g, a, x + 5, y + 30, width - 15, height / maxEventsDisplayed);
         }

@@ -87,7 +87,9 @@ public class ImportHandler {
 			
 			paramQueryPS.setString(1, event.getSummary().getValue());//"DemoJavaEvent");
 			Calendar cal = Calendar.getInstance();
-			paramQueryPS.setDate(2, new Date(cal.getTimeInMillis()), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
+			//paramQueryPS.setDate(2, new Date(cal.getTimeInMillis()), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
+			long millis = event.getDateStart().getValue().getTime();
+			paramQueryPS.setDate(2, new Date(millis), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
 			paramQueryPS.setByte(3, (byte) 0);
 			paramQueryPS.setString(4, null);
 			paramQueryPS.setInt(5, 0);

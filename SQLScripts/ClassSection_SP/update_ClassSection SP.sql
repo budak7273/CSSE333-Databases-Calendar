@@ -1,23 +1,22 @@
--- ================================================
--- Template generated from Template Explorer using:
--- Create Procedure (New Menu).SQL
---
--- Use the Specify Values for Template Parameters 
--- command (Ctrl-Shift-M) to fill in the parameter 
--- values below.
---
--- This block of comments will not be included in
--- the definition of the procedure.
--- ================================================
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Thomas Nandola
 -- Create date: May 6th, 2020
 -- Description:	Procedure to Update the ClassSection Table.
 -- =============================================
+/*
+EXEC update_ClassSection 3, 'CSSE333', 02, 'Databases', 0, 2020, 'DemoUser'
+select * from ClassSection
+*/
+
+
+USE CalendarDB
+GO
+
+-- Drop procedure if already exists
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'update_ClassSection') --got this method of checking if a proc exists from stackoverflow q#2072086
+	DROP PROCEDURE [update_ClassSection]
+GO
+
 CREATE PROCEDURE update_ClassSection (
 @ClassSectionID_1 int,
 @CourseNumber_1 varchar(8), 
@@ -48,6 +47,5 @@ BEGIN CATCH
 END CATCH;  
 GO
 
-EXEC update_ClassSection 3, 'CSSE333', 02, 'Databases', 0, 2020, 'DemoUser'
-select * from ClassSection
-
+-- Grant usage to the app user (needs to happen again when it gets deleted and re-created)
+GRANT EXECUTE ON [update_ClassSection] TO appUserCalendarDB;

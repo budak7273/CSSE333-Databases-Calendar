@@ -2,6 +2,7 @@
 
 Gets all assignments that belong to a specific Useranme via the ClassCalendars they have created
 
+Author: Rob Budak
 -------------------------------------------
 Demo: Example with minimum parameters specified
 EXEC [get_All_Assignments_Of_User] @Username_1 ='DemoUser'
@@ -17,7 +18,7 @@ GO
 
 -- Create procedure
 CREATE PROCEDURE [get_All_Assignments_Of_User]
-(@Username_1	varchar(20))
+(@Username_1	[varchar](20))
 AS
 	-- Supress row count messages
 	SET NOCOUNT ON
@@ -54,7 +55,7 @@ AS
 	IF @Status <> 0 
 	BEGIN
 		-- Return error code to the calling program to indicate failure.
-		PRINT 'An error occurred getting the assignments for the user.'
+		RAISERROR('An error occurred getting the assignments for the user.', 14, @Status)
 		RETURN @Status
 	END
 	ELSE
@@ -64,3 +65,6 @@ AS
 		RETURN 0
 	END
 GO
+
+-- Grant usage to the app user (needs to happen again when it gets deleted and re-created)
+GRANT EXECUTE ON [get_All_Assignments_Of_User] TO appUserCalendarDB;

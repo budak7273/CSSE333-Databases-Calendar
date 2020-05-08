@@ -1,23 +1,17 @@
--- ================================================
--- Template generated from Template Explorer using:
--- Create Procedure (New Menu).SQL
---
--- Use the Specify Values for Template Parameters 
--- command (Ctrl-Shift-M) to fill in the parameter 
--- values below.
---
--- This block of comments will not be included in
--- the definition of the procedure.
--- ================================================
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Thomas Nandola
 -- Create date: May 6th, 2020
 -- Description:	Procedure to Delete from the ClassCalendar Table.
 -- =============================================
+
+USE CalendarDB
+GO
+
+-- Drop procedure if already exists
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'delete_ClassCalendar') --got this method of checking if a proc exists from stackoverflow q#2072086
+	DROP PROCEDURE [delete_ClassCalendar]
+GO
+
 CREATE PROCEDURE delete_ClassCalendar(
 @ClassCalendarID_1 int,
 @Msg nvarchar(MAX) = null OUTPUT
@@ -35,4 +29,6 @@ BEGIN CATCH
 END CATCH;  
 GO
 
+-- Grant usage to the app user (needs to happen again when it gets deleted and re-created)
+GRANT EXECUTE ON [delete_ClassCalendar] TO appUserCalendarDB;
 

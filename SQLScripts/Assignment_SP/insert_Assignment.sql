@@ -9,7 +9,6 @@ DECLARE @tmp DATETIME
 SET @tmp = GETDATE()
 
 EXEC [insert_Assignment] 
-	@EventName_1='DemoEventName',
 	@EventDate_2=@tmp,
 	@ParentClassCalendarID_6=2
 --------------------------------------------------------------*/
@@ -92,7 +91,7 @@ AS
 	IF @Status <> 0 
 	BEGIN
 		-- Return error code to the calling program to indicate failure.
-		PRINT 'An error occurred inserting the assignment.'
+		RAISERROR('An error occurred inserting the assignment.', 14, @Status)
 		RETURN @Status
 	END
 	ELSE

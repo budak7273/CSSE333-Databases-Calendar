@@ -1,16 +1,22 @@
-USE CalendarDB
-GO
-DROP PROCEDURE insert_ClassSection
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Thomas Nandola
 -- Create date: 5-1-2020
 -- Description:	Inserting ClassSection Values into ClassSection Table
 -- =============================================
+/*
+EXEC insert_ClassSection 'CSSE333', 01, 'Databases', 0, 2020, 'DemoUser'
+
+select * from ClassSection
+*/
+
+USE CalendarDB
+GO
+
+-- Drop procedure if already exists
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'insert_ClassSection') --got this method of checking if a proc exists from stackoverflow q#2072086
+	DROP PROCEDURE [insert_ClassSection]
+GO
+
 CREATE PROCEDURE insert_ClassSection(
 @CourseNumber_1 varchar(8), 
 @SectionNumber_1 tinyint,
@@ -27,9 +33,5 @@ BEGIN
 	@ParentUserID_1)
 END
 
-EXEC insert_ClassSection 'CSSE333', 01, 'Databases', 0, 2020, 'DemoUser'
-
-select * from ClassSection
-
-
- 
+-- Grant usage to the app user (needs to happen again when it gets deleted and re-created)
+GRANT EXECUTE ON [insert_ClassSection] TO appUserCalendarDB;

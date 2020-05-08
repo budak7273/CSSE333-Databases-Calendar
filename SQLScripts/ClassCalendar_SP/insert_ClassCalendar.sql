@@ -4,14 +4,15 @@
 -- Description:	Procedure to Insert into the ClassCalendar Table.
 -- =============================================
 -- Demo: Example with minimum parameters specified
+/*
 	EXEC [insert_ClassCalendar] 
 	@CalendarColor_1 = 333333,
-	@ClassTime_1 = '12:00',
-	@ClassName_1 = 'CSSE220',
-	@ParentUserID_1 = 'DemoUser'
+	@ClassTime_2 = '12:00',
+	@ClassName_3 = 'CSSE220',
+	@ParentUserID_4 = 'DemoUser'
 
 	select * from ClassCalendar
-
+*/
 
 
 USE CalendarDB
@@ -25,9 +26,9 @@ GO
 -- Create procedure
 CREATE PROCEDURE insert_ClassCalendar(
 	@CalendarColor_1 [int],
-	@ClassTime_1 [time],
-	@ClassName_1 [nvarchar],
-	@ParentUserID_1 [varchar]
+	@ClassTime_2 [time],
+	@ClassName_3 [nvarchar],
+	@ParentUserID_4 [varchar]
 )
 AS
 
@@ -41,19 +42,19 @@ AS
 		SET @CalendarColor_1 = 333333
 	END
 
-	IF @ClassTime_1 is NULL
+	IF @ClassTime_2 is NULL
 	BEGIN
 		RAISERROR('ClassTime cannot be null', 14, 1)
 		RETURN 1
 	END
 
-	IF @ClassName_1 is NULL
+	IF @ClassName_3 is NULL
 	BEGIN
 		RAISERROR('ClassName cannot be null', 14, 1)
 		RETURN 1
 	END
 
-	IF @ParentUserID_1 is NULL
+	IF @ParentUserID_4 is NULL
 	BEGIN
 		RAISERROR('ParentUserID cannot be null', 14, 1)
 	END
@@ -66,14 +67,14 @@ AS
 	END
 
 	--Check max length on ClassName
-	IF LEN(@ClassName_1) > 20
+	IF LEN(@ClassName_3) > 20
 	BEGIN
 		RAISERROR('ClassName above maximum of 20 characters', 14, 1)
 		RETURN 1
 	END
 
 	--Check max length on ParentUserID
-	IF LEN(@ParentUserID_1) > 20
+	IF LEN(@ParentUserID_4) > 20
 	BEGIN
 		RAISERROR('ParentUserID above maximum of 20 characters', 14, 1)
 		RETURN 1
@@ -90,9 +91,9 @@ AS
 
 		VALUES(
 		@CalendarColor_1,
-		@ClassTime_1,
-		@ClassName_1,
-		@ParentUserID_1)
+		@ClassTime_2,
+		@ClassName_3,
+		@ParentUserID_4)
 	END
 
 	--End Actual Procedure
@@ -103,7 +104,7 @@ AS
 	IF @Status <> 0 
 	BEGIN
 		-- Return error code to the calling program to indicate failure.
-		PRINT 'An error occurred inserting the Class Calendar.'
+		RAISERROR('An error occurred inserting the Class Calendar.', 14, @Status)
 		RETURN @Status
 	END
 	ELSE
@@ -114,9 +115,6 @@ AS
 	END
 	
 GO
- 
 
-
-
-
-	
+-- Grant usage to the app user (needs to happen again when it gets deleted and re-created)
+GRANT EXECUTE ON [insert_ClassCalendar] TO appUserCalendarDB;

@@ -4,6 +4,9 @@ import java.sql.SQLException;
 
 public class DatabaseConnectionService {
 
+	private final String DB_USERNAME = "appUserCalendarDB";	// TODO: May not want to store DB access username/password like this
+	private final String DB_PASSWORD = "Password123";
+
 	private final String SampleURL = "jdbc:sqlserver://${dbServer};databaseName=${dbName};user=${user};password={${pass}}";
 
 	private Connection connection = null;
@@ -18,13 +21,13 @@ public class DatabaseConnectionService {
 		this.databaseName = databaseName;
 	}
 
-	public boolean connect(String user, String pass) {
+	public boolean connect() {
 		String connectionURL = SampleURL.replace(
 				"${dbServer}",serverName)
 				.replace("${dbName}", databaseName)
-				.replace("${user}", user)
-				.replace("${pass}", pass);
-		System.out.print("Attempting to connect to database with username " + user + "...");
+				.replace("${user}", DB_USERNAME)
+				.replace("${pass}", DB_PASSWORD);
+		System.out.print("Attempting to connect to database with username " + DB_USERNAME + "...");
 		try {
 			connection = DriverManager.getConnection(connectionURL);
 			System.out.println("Connection successful.");
@@ -36,7 +39,6 @@ public class DatabaseConnectionService {
 			return false;
 		}
 	}
-
 
 	public Connection getConnection() {
 		return this.connection;
@@ -50,5 +52,4 @@ public class DatabaseConnectionService {
 		connectionsOpen--;
 		System.out.println("Connection closed. " + connectionsOpen + " connections remain open.");
 	}
-
 }

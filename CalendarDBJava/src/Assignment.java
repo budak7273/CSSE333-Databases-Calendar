@@ -5,18 +5,18 @@ public class Assignment {
     private String EventName;
     private Date EventDate;
     private int EventProgress;
-    private String Type;
+    private String EventType;
     private int EventSpecificColor;
     private int ParentClassCalendarID;
     private int ParentClassSectionID;
     private int ImportSourceID;
 
-    public Assignment(int assignmentID, String eventName, Date eventDate, int eventProgress, String type, int eventSpecificColor, int parentClassCalendarID, int parentClassSectionID, int importSourceID) {
+    public Assignment(int assignmentID, String eventName, Date eventDate, int eventProgress, String eventType, int eventSpecificColor, int parentClassCalendarID, int parentClassSectionID, int importSourceID) {
         AssignmentID = assignmentID;
         EventName = eventName;
         EventDate = eventDate;
         EventProgress = eventProgress;
-        Type = type;
+        EventType = eventType;
         EventSpecificColor = eventSpecificColor;
         ParentClassCalendarID = parentClassCalendarID;
         ParentClassSectionID = parentClassSectionID;
@@ -41,8 +41,8 @@ public class Assignment {
         return EventProgress;
     }
 
-    public String getType() {
-        return Type;
+    public String getEventType() {
+        return EventType;
     }
 
     public int getEventSpecificColor() {

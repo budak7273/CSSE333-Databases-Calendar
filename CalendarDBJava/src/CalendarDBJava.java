@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -64,7 +66,18 @@ public class CalendarDBJava extends JFrame {
         assignmentList = assignmentService.getAllAssignmentsForUser(username);
         monthView = new MonthView(g, assignmentList);
         monthView.drawMonth(2020, Calendar.MAY);
+
+        JButton b=new JButton("Click Here");
+        b.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                System.out.println("BUTTONS!!!");   //TODO: Rob, put code here.
+            }
+        });
+        b.setBounds(50,100,95,30);
+        container.add(b);
     }
+
 }
 
 

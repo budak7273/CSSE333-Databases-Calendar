@@ -7,11 +7,11 @@
 /*
 	EXEC [insert_ClassSection] 
 	@CourseNumber_1 = 'CSSE220',
-	@SectionNumber_1 = 04,
-	@ClassName_1 = 'Databases',
-	@IsPrivate_1 = 0,
-	@SchoolYear_1 = 2020,
-	@ParentUserID_1 = 'DemoUser'
+	@SectionNumber_2 = 04,
+	@ClassName_3 = 'Databases',
+	@IsPrivate_4 = 0,
+	@SchoolYear_5 = 2020,
+	@ParentUserID_6 = 'DemoUser'
 	select * from ClassSection
 */
 
@@ -26,11 +26,11 @@ GO
 -- Create procedure
 CREATE PROCEDURE insert_ClassSection(
 @CourseNumber_1 varchar(8), 
-@SectionNumber_1 tinyint,
-@ClassName_1 nvarchar(20), 
-@IsPrivate_1 bit,
-@SchoolYear_1 smallint, 
-@ParentUserID_1 varchar(20)
+@SectionNumber_2 tinyint,
+@ClassName_3 nvarchar(20), 
+@IsPrivate_4 bit,
+@SchoolYear_5 smallint, 
+@ParentUserID_6 varchar(20)
 )
 AS
 
@@ -45,31 +45,31 @@ AS
 		RETURN 1
 	END
 
-	IF @SectionNumber_1 is NULL
+	IF @SectionNumber_2 is NULL
 	BEGIN
 		RAISERROR('Section Number cannot be null', 14, 1)
 		RETURN 1
 	END
 
-	IF @ClassName_1 is NULL
+	IF @ClassName_3 is NULL
 	BEGIN
 		RAISERROR('Class Name cannot be null', 14, 1)
 		RETURN 1
 	END
 
-	IF @IsPrivate_1 is NULL
+	IF @IsPrivate_4 is NULL
 	BEGIN
 		RAISERROR('IsPrivate cannot be null', 14, 1)
 		RETURN 1
 	END
 
-	IF @SchoolYear_1 is NULL
+	IF @SchoolYear_5 is NULL
 	BEGIN
 		RAISERROR('School Year cannot be null', 14, 1)
 		RETURN 1
 	END
 
-	IF @ParentUserID_1 is NULL
+	IF @ParentUserID_6 is NULL
 	BEGIN
 		RAISERROR('ParentUserID cannot be null', 14, 1)
 		RETURN 1
@@ -83,14 +83,14 @@ AS
 	END
 
 	--Check max length on ClassName
-	IF LEN(@ClassName_1) > 20
+	IF LEN(@ClassName_3) > 20
 	BEGIN
 		RAISERROR('Class Name above maximum of 20 characters', 14, 1)
 		RETURN 1
 	END
 
 	--Check max length on ParentUserID
-	IF LEN(@ParentUserID_1) > 20
+	IF LEN(@ParentUserID_6) > 20
 	BEGIN
 		RAISERROR('ParentUserID above maximum of 20 characters', 14, 1)
 		RETURN 1
@@ -101,8 +101,8 @@ AS
 	BEGIN
 		INSERT INTO ClassSection
 		(CourseNumber, SectionNumber, ClassName, IsPrivate, SchoolYear, ParentUserID)
-		Values(@CourseNumber_1, @SectionNumber_1, @ClassName_1, @IsPrivate_1, @SchoolYear_1,
-		@ParentUserID_1)
+		Values(@CourseNumber_1, @SectionNumber_2, @ClassName_3, @IsPrivate_4, @SchoolYear_5,
+		@ParentUserID_6)
 	END
 
 	--End Actual Procedure

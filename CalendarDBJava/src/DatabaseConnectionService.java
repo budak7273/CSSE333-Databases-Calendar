@@ -46,10 +46,13 @@ public class DatabaseConnectionService {
 
 	public void closeConnection() {
 		try {
-			connection.close();
+			if(connection != null)
+				connection.close();
+			else
+				System.err.println("Tried to close a database connection that was not opened");
 		} catch (SQLException ignored) {
 		}
 		connectionsOpen--;
-		System.out.println("Connection closed. " + connectionsOpen + " connections remain open.");
+		System.out.println("Connection closed. " + connectionsOpen + " connections remain open across the entire application.");
 	}
 }

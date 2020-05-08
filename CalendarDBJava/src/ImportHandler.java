@@ -31,39 +31,44 @@ public class ImportHandler {
 	public int RUN_COUNTER = 0;
 	private DatabaseConnectionService dbService;
 	
-	public ImportHandler(DatabaseConnectionService dbS) {
-		dbService = dbS;
+	String serverNameToUse;
+	String databaseNameToUse;
+	
+	public ImportHandler(String serverName, String databaseName) {
+		serverNameToUse = serverName;
+		databaseNameToUse = databaseName;
 	}
 	
 	public boolean promptICalImport() {
-		RUN_COUNTER++;
+		JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+		fc.setFileFilter(new FileNameExtensionFilter("iCalendar Files (.ics)", "ics"));
 		
-		if(RUN_COUNTER >= 2) { //only run on the second call and above - UGLY fix for current method of prompting (second paint) TODO replace
-			JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
-			fc.setFileFilter(new FileNameExtensionFilter("iCalendar Files (.ics)", "ics"));
-			
-			System.out.println("Select an iCal file to test.");
-			int rVal = fc.showOpenDialog(null);
-			
-			if(rVal == 0) { //successfully opened file
-				File iCalFile = fc.getSelectedFile();
-				System.out.println("You selected the file " + iCalFile.getName());
-				try {
-					System.out.println("Parsing with Biweekly...");
-					return biweekly(iCalFile);
-				} catch (Exception e) {
-					System.out.println("Biweekly failed to parse the file");
-					return false;
-				}
-				
+		System.out.println("Select an iCal file to test.");
+		int rVal = fc.showOpenDialog(null);
+		
+		if(rVal == 0) { //successfully opened file
+			File iCalFile = fc.getSelectedFile();
+			System.out.println("You selected the file " + iCalFile.getName());
+			try {
+				System.out.println("Parsing with Biweekly...");
+				dbService = new DatabaseConnectionService(serverNameToUse, databaseNameToUse);
+				dbService.connect();
+				boolean tmp = biweeklyParse(iCalFile);
+				dbService.closeConnection();
+				return tmp;
+			} catch (Exception e) {
+				System.out.println("Biweekly failed to parse the file");
+				return false;
 			}
 			
-			/*VEvent tmp = new VEvent();
-			tmp.setSummary("DemoJavaVEvent");
-			return addAssignmentFromICalParse(tmp, 0, 0);*/
 		}
-		System.out.println("called but ignored");
+		
+		/*VEvent tmp = new VEvent();
+		tmp.setSummary("DemoJavaVEvent");
+		return addAssignmentFromICalParse(tmp, 0, 0);*/
 		return false;
+		
+		
 	}
 	
 	/**
@@ -98,6 +103,7 @@ public class ImportHandler {
 //	        	JOptionPane.showMessageDialog(null, "An error occurred when processing the Event");
 //	        	return false;
 	        }
+	        System.out.println("Upload of assignment " + event.getSummary().getValue() + " succeeded");
 	        return true;
 		} catch (SQLException e) {
 			JOptionPane.showMessageDialog(null, "An error occurred in adding the restaurant. See the printed stack trace.");
@@ -111,10 +117,11 @@ public class ImportHandler {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("Upload of assignment " + event.getSummary().getValue() + " FAILED");
         return false;
 	}
 	
-	private boolean biweekly(File calfile) throws Exception {
+	private boolean biweeklyParse(File calfile) throws Exception {
 		
 		StringBuilder strBuild = new StringBuilder();
 		String str= "";

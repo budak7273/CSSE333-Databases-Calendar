@@ -94,7 +94,7 @@ public class ImportHandler {
 			paramQueryPS.setString(4, null);
 			paramQueryPS.setInt(5, 0);
 			paramQueryPS.setInt(6, 2);//TODO set this to the passed parentClassCalendarID instead of testing ID#2
-			paramQueryPS.setInt(7, 3); //TODO set this to the passed parentClassSectionID instead of testing ID#3
+			paramQueryPS.setInt(7, 4); //TODO set this to the passed parentClassSectionID instead of testing ID#3
 			paramQueryPS.setInt(8, 1); //TODO set this to the passed importSourceID instead of testing ID#1
 			
 	        int rCode = paramQueryPS.executeUpdate(); //for some reason this returns 1 for success and -1 for failure. This is not documented seemingly anywhere I could find?

@@ -1,9 +1,6 @@
 
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -19,16 +16,14 @@ public class AssignmentService {
 
         dbService.connect();
         Connection con = dbService.getConnection();
-        Statement statement = null;
+        PreparedStatement getAllAssignmentsPS = null;
 
         try {
-            statement = con.createStatement();
-            String query = "SELECT AssignmentID, EventName, EventDate, EventProgress, Type, EventSpecificColor, ParentClassCalendarID, ParentClassSectionID, ImportSourceID, CalendarColor, ClassTime, ClassName, ParentUserID AS UserID\n" +
-                    "FROM Assignment A\n" +
-                    "INNER JOIN ClassCalendar CC\n" +
-                    "ON A.ParentClassCalendarID = CC.ClassCalendarID\n" +
-                    "WHERE ParentUserID = '" + username + "'"; //TODO: SQL Injection VULNERABLE
-            ResultSet rs = statement.executeQuery(query);
+            String getAllAssignmentsQueryString = "{call get_All_Assignments_Of_User(?)}";
+            getAllAssignmentsPS = this.dbService.getConnection().prepareStatement(getAllAssignmentsQueryString);
+            getAllAssignmentsPS.setString(1, username);
+
+            ResultSet rs = getAllAssignmentsPS.executeQuery();
             while (rs.next()) {
                 int AssignmentID = rs.getInt("AssignmentID");
                 String EventName = rs.getString("EventName");
@@ -52,8 +47,9 @@ public class AssignmentService {
             e.printStackTrace();
         } finally {
             try {
-                if (statement != null)
-                    statement.close();
+                if (getAllAssignmentsPS != null)
+                    System.out.println("Closing getAllAssignmentsForUser Connection");
+                    getAllAssignmentsPS.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -61,5 +57,4 @@ public class AssignmentService {
         
         return assignments;
     }
-
 }

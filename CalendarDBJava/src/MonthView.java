@@ -36,7 +36,8 @@ public class MonthView {
      * Draws the current (IRL) month.
      */
     public void drawMonth() {
-        drawMonth(2020, Calendar.MAY);
+        Date currentDate = new Date();
+        drawMonth(currentDate.getYear(), currentDate.getMonth());
     }
 
     /**
@@ -84,9 +85,13 @@ public class MonthView {
     }
 
     private void drawEventList(int x, int y, int dayOfMonth) {
+        int eventsDisplayed = 0;
+        int eventHeight = dayHeight / (maxEventsDisplayed + 1);
         for (Assignment a : assignmentList) {
-            if (a.getEventDate().getYear() == 2020-1900 && a.getEventDate().getMonth() == month && a.getEventDate().getDate() == dayOfMonth)
-                drawAssignment(a, x + 5, y + 30, dayWidth - 15, dayHeight / maxEventsDisplayed);
+            if (a.getEventDate().getYear() == year && a.getEventDate().getMonth() == month && a.getEventDate().getDate() == dayOfMonth) {
+                drawAssignment(a, x + 5, y + 30 + eventHeight * eventsDisplayed, dayWidth - 15, eventHeight);
+                eventsDisplayed++;
+            }
         }
     }
 
@@ -94,14 +99,15 @@ public class MonthView {
         g.setColor(new Color(assignment.getEventSpecificColor()));
         g.fillRect(x, y, width, height);
         g.setColor(Color.WHITE);
-        g.drawString(assignment.getEventName(), x, y + 20);
+        g.drawString(assignment.getEventName(), x + horizontalDaySeparation, y + 20);
     }
 
     private void updateMonth() {
-        if (year == 2020 && month == Calendar.MAY) {
-            firstDayOfMonth = Calendar.FRIDAY;
-            daysInMonth = 31;
-        }
+//        Date firstDayOfMonthDate = new Date(year, month, 1);
+//        firstDayOfMonth = firstDayOfMonthDate.getDay();
+        Calendar cal = Calendar.getInstance();
+        cal.set(2020, Calendar.MAY, 1);
+        firstDayOfMonth = cal.get(Calendar.DAY_OF_WEEK);
+        daysInMonth = cal.getActualMaximum(Calendar.DATE);
     }
-
 }

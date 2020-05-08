@@ -50,6 +50,18 @@ public class CalendarDBJava extends JFrame {
         
         importHandler = new ImportHandler("golem.csse.rose-hulman.edu", "CalendarDB");
 
+        JButton b=new JButton("Upload iCal File");
+        b.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                importHandler.promptICalImport();
+            }
+
+        });
+        b.setBounds(50,100,95,30);
+        container.add(b);
+
+
         // Close DB connection on exit
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -68,20 +80,9 @@ public class CalendarDBJava extends JFrame {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        assignmentList = assignmentService.getAllAssignmentsForUser(username);
+        assignmentList = assignmentService.getAllAssignmentsForUser(username); // TODO maybe move db connection outside paint method?
         monthView = new MonthView(g, assignmentList);
-        monthView.drawMonth(2020, Calendar.MAY);
-
-        JButton b=new JButton("Upload iCal File");
-        b.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-            	importHandler.promptICalImport();
-            }
-
-        });
-        b.setBounds(50,100,95,30);
-        container.add(b);
+        monthView.drawMonth(2020 - 1900, Calendar.MAY);
     }
 
 }

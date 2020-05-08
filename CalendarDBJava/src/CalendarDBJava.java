@@ -42,11 +42,10 @@ public class CalendarDBJava extends JFrame {
         container.setLayout(new FlowLayout());
         container.setBackground(Color.BLUE);
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        setVisible(true);
+
         
         dbConnectService = new DatabaseConnectionService("golem.csse.rose-hulman.edu", "CalendarDB");
         assignmentService = new AssignmentService(dbConnectService); //TODO close this connection eventually, which can probably happen earlier than close
-        
         
         importHandler = new ImportHandler("golem.csse.rose-hulman.edu", "CalendarDB");
 
@@ -55,12 +54,17 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 importHandler.promptICalImport();
+                assignmentList = assignmentService.getAllAssignmentsForUser(username); // TODO maybe move db connection outside paint method?
+                monthView = new MonthView(assignmentList);
+                paint(container.getGraphics());
             }
 
         });
         b.setBounds(50,100,95,30);
         container.add(b);
 
+        assignmentList = assignmentService.getAllAssignmentsForUser(username); // TODO maybe move db connection outside paint method?
+        monthView = new MonthView(assignmentList);
 
         // Close DB connection on exit
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -70,6 +74,8 @@ public class CalendarDBJava extends JFrame {
             	System.exit(0);
             }
         });
+
+        setVisible(true);
     }
 
     @SuppressWarnings("unused")
@@ -80,9 +86,7 @@ public class CalendarDBJava extends JFrame {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        assignmentList = assignmentService.getAllAssignmentsForUser(username); // TODO maybe move db connection outside paint method?
-        monthView = new MonthView(g, assignmentList);
-        monthView.drawMonth(2020 - 1900, Calendar.MAY);
+        monthView.drawMonth(g, 2020, Calendar.MAY);
     }
 
 }

@@ -27,25 +27,25 @@ public class MonthView {
     private int year;
     private int month;
 
-    public MonthView(Graphics g, ArrayList<Assignment> assignmentList) {
-        this.g = g;
+    public MonthView(ArrayList<Assignment> assignmentList) {
         this.assignmentList = assignmentList;
     }
 
     /**
      * Draws the current (IRL) month.
      */
-    public void drawMonth() {
+    public void drawMonth(Graphics g) {
         Date currentDate = new Date();
-        drawMonth(currentDate.getYear(), currentDate.getMonth());
+        drawMonth(g, currentDate.getYear(), currentDate.getMonth());
     }
 
     /**
      * Draws a given Month.
-     * @param year the year of the month to draw.
+     * @param year the year of the month to draw (in normal format, ex 2020)
      * @param month the month (zero indexed, like Calendar.MONTH_NAME)
      */
-    public void drawMonth(int year, int month) {
+    public void drawMonth(Graphics g, int year, int month) {
+        this.g = g;
         this.year = year;
         this.month = month;
         updateMonth();
@@ -88,9 +88,10 @@ public class MonthView {
         int eventsDisplayed = 0;
         int eventHeight = dayHeight / (maxEventsDisplayed + 1);
         for (Assignment a : assignmentList) {
-            if (a.getEventDate().getYear() == year && a.getEventDate().getMonth() == month && a.getEventDate().getDate() == dayOfMonth) {
+            if (a.getEventDate().getYear() == year - 1900 && a.getEventDate().getMonth() == month && a.getEventDate().getDate() == dayOfMonth) {
                 drawAssignment(a, x + 5, y + 30 + eventHeight * eventsDisplayed, dayWidth - 15, eventHeight);
                 eventsDisplayed++;
+                if (eventsDisplayed > maxEventsDisplayed) return;
             }
         }
     }
@@ -106,7 +107,7 @@ public class MonthView {
 //        Date firstDayOfMonthDate = new Date(year, month, 1);
 //        firstDayOfMonth = firstDayOfMonthDate.getDay();
         Calendar cal = Calendar.getInstance();
-        cal.set(2020, Calendar.MAY, 1);
+        cal.set(year, month, 1);
         firstDayOfMonth = cal.get(Calendar.DAY_OF_WEEK);
         daysInMonth = cal.getActualMaximum(Calendar.DATE);
     }

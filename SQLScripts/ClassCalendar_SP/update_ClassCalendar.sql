@@ -3,16 +3,16 @@
 -- Create date: May 6th, 2020
 -- Description:	Procedure to Update the Class Calendar Table.
 -- =============================================
-/*
+
 EXEC [update_ClassCalendar] 
 	@ClassCalendarID_1 = 6,
-	@CalendarColor_1 = 222222,
-	@ClassTime_1 = '8:00',
-	@ClassName_1 = 'CSSE330',
-	@ParentUserID_1 = 'DemoUser'
+	@CalendarColor_1 = 4567,
+	@ClassTime_2 = '9:00',
+	@ClassName_3 = 'CSSE330',
+	@ParentUserID_4 = 'DemoUser'
 	
 select * FROM ClassCalendar
-*/
+
 
 USE CalendarDB
 GO
@@ -25,9 +25,9 @@ GO
 CREATE PROCEDURE update_ClassCalendar(
 @ClassCalendarID_1 int,
 @CalendarColor_1 int,
-@ClassTime_1 time,
-@ClassName_1 nvarchar(20),
-@ParentUserID_1 varchar(20),
+@ClassTime_2 time,
+@ClassName_3 nvarchar(20),
+@ParentUserID_4 varchar(20),
 @Msg nvarchar(MAX) = null OUTPUT
 )
 AS
@@ -36,9 +36,9 @@ BEGIN TRY
 	SET
 
 	CalendarColor = @CalendarColor_1,
-	ClassTime = @ClassTime_1,
-	ClassName = @ClassName_1,
-	ParentUserID = @ParentUserID_1
+	ClassTime = @ClassTime_2,
+	ClassName = @ClassName_3,
+	ParentUserID = @ParentUserID_4
 	
 	WHERE ClassCalendarID = @ClassCalendarID_1
 		SET @Msg = 'Class Calendar Updated Successfully!'

@@ -6,9 +6,9 @@
 -- Demo: Example with minimum parameters specified
 
 	EXEC [insert_ClassCalendar] 
-	@CalendarColor_1 = 3333333,
-	@ClassTime_2 = '12:00',
-	@ClassName_3 = 'CSSE220',
+	@CalendarColor_1 = 1234,
+	@ClassTime_2 = '11:00',
+	@ClassName_3 = 'CSSE230',
 	@ParentUserID_4 = 'DemoUser'
 
 	select * from ClassCalendar

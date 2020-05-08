@@ -3,11 +3,9 @@
 -- Create date: May 6th, 2020
 -- Description:	Procedure to Update the ClassSection Table.
 -- =============================================
-/*
+
 EXEC update_ClassSection 3, 'CSSE333', 02, 'Databases', 0, 2020, 'DemoUser'
 select * from ClassSection
-*/
-
 
 USE CalendarDB
 GO
@@ -20,11 +18,11 @@ GO
 CREATE PROCEDURE update_ClassSection (
 @ClassSectionID_1 int,
 @CourseNumber_1 varchar(8), 
-@SectionNumber_1 tinyint,
-@ClassName_1 nvarchar(20), 
-@IsPrivate_1 bit, 
-@SchoolYear_1 smallint, 
-@ParentUserID_1 varchar(20),
+@SectionNumber_2 tinyint,
+@ClassName_3 nvarchar(20), 
+@IsPrivate_4 bit, 
+@SchoolYear_5 smallint, 
+@ParentUserID_6 varchar(20),
 @Msg nvarchar(MAX) = null OUTPUT
 )
 AS
@@ -32,11 +30,11 @@ BEGIN TRY
 	UPDATE ClassSection
 	SET
 	CourseNumber = @CourseNumber_1,
-	SectionNumber = @SectionNumber_1,
-	ClassName = @ClassName_1,
-	IsPrivate = @IsPrivate_1,
-	SchoolYear = @SchoolYear_1,
-	ParentUserID = @ParentUserID_1
+	SectionNumber = @SectionNumber_2,
+	ClassName = @ClassName_3,
+	IsPrivate = @IsPrivate_4,
+	SchoolYear = @SchoolYear_5,
+	ParentUserID = @ParentUserID_6
 
 	WHERE ClassSectionID = @ClassSectionID_1
 		SET @Msg = 'ClassSection Updated Successfully!'

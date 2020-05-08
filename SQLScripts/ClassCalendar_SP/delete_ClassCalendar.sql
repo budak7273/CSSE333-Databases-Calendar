@@ -4,6 +4,9 @@
 -- Description:	Procedure to Delete from the ClassCalendar Table.
 -- =============================================
 
+EXEC delete_ClassCalendar 6
+select * from ClassCalendar
+
 USE CalendarDB
 GO
 

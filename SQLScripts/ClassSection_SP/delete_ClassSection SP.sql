@@ -4,6 +4,9 @@
 -- Description:	Procedure to Delete from the ClassSection Table.
 -- =============================================
 
+EXEC delete_ClassSection 3
+select * from ClassSection
+
 USE CalendarDB
 GO
 

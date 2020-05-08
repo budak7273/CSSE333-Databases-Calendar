@@ -5,8 +5,8 @@
 -- =============================================
 -- Demo: Example with minimum parameters specified
 	EXEC [insert_ClassCalendar] 
-	@CalendarColor_1 = 55555,
-	@ClassTime_1 = '9:00',
+	@CalendarColor_1 = 333333,
+	@ClassTime_1 = '12:00',
 	@ClassName_1 = 'CSSE220',
 	@ParentUserID_1 = 'DemoUser'
 

@@ -22,13 +22,13 @@ import biweekly.property.Description;
 import biweekly.property.ICalProperty;
 import biweekly.property.RecurrenceRule;
 import biweekly.util.ListMultimap;
-import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.util.Configurator;
-import us.k5n.ical.ICalendarParser;
+//import net.fortuna.ical4j.data.CalendarBuilder;
+//import net.fortuna.ical4j.model.Calendar;
+//import net.fortuna.ical4j.model.Component;
+//import net.fortuna.ical4j.model.Property;
+//import net.fortuna.ical4j.model.component.CalendarComponent;
+//import net.fortuna.ical4j.util.Configurator;
+//import us.k5n.ical.ICalendarParser;
 
 
 /**
@@ -82,7 +82,7 @@ public class Main {
 	 * Tries to use k5n-ical to process the calendar file
 	 * @param calfile
 	 */
-	private static void k5n(File calfile) {
+	/*private static void k5n(File calfile) {
 		ICalendarParser icp = new ICalendarParser(0);
 		BufferedReader br = null;
 		
@@ -103,13 +103,13 @@ public class Main {
 		}
 		
 		System.out.println(icp.toString());
-	}
+	}*/
 	
 	/**
 	 * Tries to use ical4j to process the calendar file
 	 * @param calfile
 	 */
-	private static void ical4j(File calfile) {
+	/*private static void ical4j(File calfile) {
 		//http://ical4j.sourceforge.net/introduction.html
 		
 		FileInputStream fin;
@@ -135,7 +135,7 @@ public class Main {
 		}
 
 		
-	}
+	}*/
 
 	/**
 	 * Tries to use Biweekly to process the calendar file

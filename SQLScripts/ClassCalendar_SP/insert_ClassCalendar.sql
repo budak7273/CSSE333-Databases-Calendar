@@ -4,15 +4,15 @@
 -- Description:	Procedure to Insert into the ClassCalendar Table.
 -- =============================================
 -- Demo: Example with minimum parameters specified
-/*
+
 	EXEC [insert_ClassCalendar] 
-	@CalendarColor_1 = 333333,
+	@CalendarColor_1 = 3333333,
 	@ClassTime_2 = '12:00',
 	@ClassName_3 = 'CSSE220',
 	@ParentUserID_4 = 'DemoUser'
 
 	select * from ClassCalendar
-*/
+
 
 
 USE CalendarDB
@@ -25,10 +25,10 @@ GO
 
 -- Create procedure
 CREATE PROCEDURE insert_ClassCalendar(
-	@CalendarColor_1 [int],
-	@ClassTime_2 [time],
-	@ClassName_3 [nvarchar],
-	@ParentUserID_4 [varchar]
+	@CalendarColor_1 int,
+	@ClassTime_2 time,
+	@ClassName_3 nvarchar(20),
+	@ParentUserID_4 varchar(20)
 )
 AS
 

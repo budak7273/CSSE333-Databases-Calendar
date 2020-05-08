@@ -3,5 +3,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="mssql-jdbc-6.2.2.jre8.jar"/>
+	<classpathentry kind="lib" path="C:/Users/budakrc/Documents/Git/CSSE333-Databases-Calendar/biweekly-0.6.3-with-deps/vinnie-2.0.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/budakrc/Documents/Git/CSSE333-Databases-Calendar/biweekly-0.6.3-with-deps/biweekly-0.6.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/budakrc/Documents/Git/CSSE333-Databases-Calendar/biweekly-0.6.3-with-deps/jackson-core-2.9.8.jar"/>
 	<classpathentry kind="output" path="out/production/CalendarDBJava"/>
 </classpath>

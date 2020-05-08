@@ -1,15 +1,18 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Vector;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import biweekly.Biweekly;
@@ -22,127 +25,103 @@ import biweekly.property.Description;
 import biweekly.property.ICalProperty;
 import biweekly.property.RecurrenceRule;
 import biweekly.util.ListMultimap;
-//import net.fortuna.ical4j.data.CalendarBuilder;
-//import net.fortuna.ical4j.model.Calendar;
-//import net.fortuna.ical4j.model.Component;
-//import net.fortuna.ical4j.model.Property;
-//import net.fortuna.ical4j.model.component.CalendarComponent;
-//import net.fortuna.ical4j.util.Configurator;
-//import us.k5n.ical.ICalendarParser;
 
+public class ImportHandler {
 
-/**
- * Class that tests an iCal Parser framework. Prompts the user to open an iCal file, then operates on the file.
- * @author budakrc
- *
- */
-public class Main {
+	public int RUN_COUNTER = 0;
+	private DatabaseConnectionService dbService;
 	
-	public static void main(String[] args) {
-		
-		
+	String serverNameToUse;
+	String databaseNameToUse;
+	
+	public ImportHandler(String serverName, String databaseName) {
+		serverNameToUse = serverName;
+		databaseNameToUse = databaseName;
+	}
+	
+	public boolean promptICalImport() {
 		JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
 		fc.setFileFilter(new FileNameExtensionFilter("iCalendar Files (.ics)", "ics"));
 		
 		System.out.println("Select an iCal file to test.");
 		int rVal = fc.showOpenDialog(null);
-//		System.out.println(rVal);
-				
+		
 		if(rVal == 0) { //successfully opened file
 			File iCalFile = fc.getSelectedFile();
 			System.out.println("You selected the file " + iCalFile.getName());
-			
-//			try { 	
-//				System.out.println("Parsing with k5n...");
-//				k5n(iCalFile);
-//			} catch (Exception e) {
-//				System.out.println("k5n failed to parse the file");
-//			}
-//			
-//			try {
-//				System.out.println("Parsing with ical4j...");
-//				ical4j(iCalFile);
-//			} catch (Exception e) {
-//				System.out.println("ical4j failed to parse the file");
-//			}
-			
 			try {
 				System.out.println("Parsing with Biweekly...");
-				biweekly(iCalFile);
+				dbService = new DatabaseConnectionService(serverNameToUse, databaseNameToUse);
+				dbService.connect();
+				boolean tmp = biweeklyParse(iCalFile);
+				dbService.closeConnection();
+				return tmp;
 			} catch (Exception e) {
 				System.out.println("Biweekly failed to parse the file");
+				return false;
 			}
 			
 		}
+		
+		/*VEvent tmp = new VEvent();
+		tmp.setSummary("DemoJavaVEvent");
+		return addAssignmentFromICalParse(tmp, 0, 0);*/
+		return false;
 		
 		
 	}
 	
 	/**
-	 * Tries to use k5n-ical to process the calendar file
-	 * @param calfile
+	 * Handles a VEvent from an ical file and adds it to the database
+	 * @param event
+	 * @param parentClassCalendarID
+	 * @param importSourceID The import source obtained from running the create import source sproc
+	 * @return
 	 */
-	/*private static void k5n(File calfile) {
-		ICalendarParser icp = new ICalendarParser(0);
-		BufferedReader br = null;
-		
+	public boolean addAssignmentFromICalParse(VEvent event, int parentClassCalendarID, int importSourceID) {
+        String paramQueryString = "{call insert_Assignment(?,?,?,?,?,?,?,?)}";
+        
+        PreparedStatement paramQueryPS = null;
 		try {
-			br = new BufferedReader(new FileReader(calfile));
-			icp.parse(br);
+			paramQueryPS = this.dbService.getConnection().prepareStatement(paramQueryString);
 			
-		} catch (Exception e) {
+			paramQueryPS.setString(1, event.getSummary().getValue());//"DemoJavaEvent");
+			Calendar cal = Calendar.getInstance();
+			paramQueryPS.setDate(2, new Date(cal.getTimeInMillis()), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
+			paramQueryPS.setByte(3, (byte) 0);
+			paramQueryPS.setString(4, null);
+			paramQueryPS.setInt(5, 0);
+			paramQueryPS.setInt(6, 2);//TODO set this to the passed parentClassCalendarID instead of testing ID#2
+			paramQueryPS.setInt(7, 3); //TODO set this to the passed parentClassSectionID instead of testing ID#3
+			paramQueryPS.setInt(8, 1); //TODO set this to the passed importSourceID instead of testing ID#1
+			
+	        int rCode = paramQueryPS.executeUpdate(); //for some reason this returns 1 for success and -1 for failure. This is not documented seemingly anywhere I could find?
+	        //System.out.println(rCode);
+	        if(rCode >= 0) { //for some reason it still returns -1 even on a successful add?? Task failed successfully!
+//	        	return true;
+	        } else {
+//	        	JOptionPane.showMessageDialog(null, "An error occurred when processing the Event");
+//	        	return false;
+	        }
+	        System.out.println("Upload of assignment " + event.getSummary().getValue() + " succeeded");
+	        return true;
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred in adding the restaurant. See the printed stack trace.");
 			e.printStackTrace();
 		} finally {
-			if(br != null)
-				try {
-					br.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}
-		
-		System.out.println(icp.toString());
-	}*/
-	
-	/**
-	 * Tries to use ical4j to process the calendar file
-	 * @param calfile
-	 */
-	/*private static void ical4j(File calfile) {
-		//http://ical4j.sourceforge.net/introduction.html
-		
-		FileInputStream fin;
-		try {
-			fin = new FileInputStream(calfile);
-			
-			CalendarBuilder builder = new CalendarBuilder();
-
-			Calendar calendar = builder.build(fin);
-			
-			for (Iterator<CalendarComponent> i = calendar.getComponents().iterator(); i.hasNext();) {
-			    Component component = (Component) i.next();
-			    System.out.println("Component [" + component.getName() + "]");
-
-			    for (Iterator<Property> j = component.getProperties().iterator(); j.hasNext();) {
-			        Property property = (Property) j.next();
-			        System.out.println("Property [" + property.getName() + ", " + property.getValue() + "]");
-			    }
+			try {
+				if (paramQueryPS != null) 
+					paramQueryPS.close();
+			} catch (SQLException e) {
+				JOptionPane.showMessageDialog(null, "An error occurred in closing the statement. See the printed stack trace.");
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-
-		
-	}*/
-
-	/**
-	 * Tries to use Biweekly to process the calendar file
-	 * @param calfile
-	 * @throws Exception when the file can't be parsed
-	 */
-	private static void biweekly(File calfile) throws Exception {
+		System.out.println("Upload of assignment " + event.getSummary().getValue() + " FAILED");
+        return false;
+	}
+	
+	private boolean biweeklyParse(File calfile) throws Exception {
 		
 		StringBuilder strBuild = new StringBuilder();
 		String str= "";
@@ -161,25 +140,30 @@ public class Main {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			return false;
 		}
 		
 		//System.out.println("READ:\n\r" + str);
 		
 		ICalendar ical = Biweekly.parse(str).first();
 		
-		if(ical == null)
-			throw new Exception("The calendar file you entered could not be parsed");
-		else {
+		if(ical == null) {
+			System.out.println("The calendar file you entered could not be parsed");
+			return false;
+		} else {
 			List<VEvent> allEvents = ical.getEvents();
 			System.out.println("This iCal file contains " + allEvents.size() + " events.");
 			for (VEvent thisEvent : allEvents) {
 				try {
 					printEventDetails(thisEvent, false);
+					System.out.println("attempting to upload...");
+					addAssignmentFromICalParse(thisEvent, 0, 0); //TODO get and use parent cal id and import source ID
 				} catch (NullPointerException ex) {
 					System.out.println("A property of this event failed to be displayed.");
 				}
 			}
 		}
+		return true;
 	}
 	
 	/**

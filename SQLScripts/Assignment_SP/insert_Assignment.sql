@@ -2,6 +2,7 @@
 
 Inserts an assignment with the given specifications.
 
+Author: Rob Budak
 -------------------------------------------
 Demo: Example with minimum parameters specified
 DECLARE @tmp DATETIME
@@ -23,10 +24,10 @@ GO
 
 -- Create procedure
 CREATE PROCEDURE [insert_Assignment]
-(@EventName_1				[nvarchar] = null,
+(@EventName_1				[nvarchar](75) = null,
  @EventDate_2				[datetime],
  @EventProgress_3			[tinyint] = 0,
- @Type_4					[nvarchar] = null,
+ @Type_4					[nvarchar](20) = null,
  @EventSpecificColor_5		[int] = null,
  @ParentClassCalendarID_6	[int],
  @ParentClassSectionID_7	[int] = null, --TODO were we going to be removing this, since there is already a link to it via the class calendar?
@@ -101,3 +102,6 @@ AS
 		RETURN 0
 	END
 GO
+
+-- Grant usage to the app user (needs to happen again when it gets deleted and re-created)
+GRANT EXECUTE ON [insert_Assignment] TO appUserCalendarDB;

@@ -4,16 +4,16 @@
 -- Description:	Inserting ClassSection Values into ClassSection Table
 -- =============================================
 -- Demo: Example with minimum parameters specified
-/*
+	/*
 	EXEC [insert_ClassSection] 
-	@CourseNumber_1 = 'CSSE220',
-	@SectionNumber_2 = 04,
-	@ClassName_3 = 'Databases',
+	@CourseNumber_1 = 'CSSE320',
+	@SectionNumber_2 = 05,
+	@ClassName_3 = 'AdvancedDatabases',
 	@IsPrivate_4 = 0,
 	@SchoolYear_5 = 2020,
-	@ParentUserID_6 = 'DemoUser'
+	@ParentUserID_6 = 'DemoUsers'
 	select * from ClassSection
-*/
+	*/
 
 USE CalendarDB
 GO
@@ -37,63 +37,76 @@ AS
 	-- Supress row count messages
 	SET NOCOUNT ON
 	PRINT 'DEBUG start'
+	--Check for ParentUserID
+	IF NOT EXISTS 
+	(
+	SELECT ParentUserID
+	FROM ClassSection
+	WHERE 
+	ParentUserID = @ParentUserID_6
+	)
+	BEGIN  
+	-- Return 99 to the calling program to indicate failure.  
+	PRINT N'An error occurred, ParentUserID does not exist.';  
+	RETURN 99;  
+	END
 
 	--Check parameters that aren't allowed to be null
 	IF @CourseNumber_1 is NULL
 	BEGIN
-		RAISERROR('Course Number cannot be null', 14, 1)
+		PRINT('Course Number cannot be null')
 		RETURN 1
 	END
 
 	IF @SectionNumber_2 is NULL
 	BEGIN
-		RAISERROR('Section Number cannot be null', 14, 1)
-		RETURN 1
+		PRINT('Section Number cannot be null')
+		RETURN 2
 	END
 
 	IF @ClassName_3 is NULL
 	BEGIN
-		RAISERROR('Class Name cannot be null', 14, 1)
-		RETURN 1
+		PRINT('Class Name cannot be null')
+		RETURN 3
 	END
 
 	IF @IsPrivate_4 is NULL
 	BEGIN
-		RAISERROR('IsPrivate cannot be null', 14, 1)
-		RETURN 1
+		PRINT('IsPrivate cannot be null')
+		RETURN 4
 	END
 
 	IF @SchoolYear_5 is NULL
 	BEGIN
-		RAISERROR('School Year cannot be null', 14, 1)
-		RETURN 1
+		PRINT('School Year cannot be null')
+		RETURN 5
 	END
 
 	IF @ParentUserID_6 is NULL
 	BEGIN
-		RAISERROR('ParentUserID cannot be null', 14, 1)
-		RETURN 1
+		PRINT('ParentUserID cannot be null')
+		RETURN 6
 	END
 
 	--Check max length on CourseNumber
 	IF LEN(@CourseNumber_1) > 8
 	BEGIN
-		RAISERROR('Course Number above maximum of 20 characters', 14, 1)
-		RETURN 1
+		PRINT('Course Number above maximum of 20 characters')
+		RETURN 8
 	END
 
 	--Check max length on ClassName
 	IF LEN(@ClassName_3) > 20
 	BEGIN
-		RAISERROR('Class Name above maximum of 20 characters', 14, 1)
-		RETURN 1
+		PRINT('Class Name above maximum of 20 characters')
+		RETURN 9
 	END
 
 	--Check max length on ParentUserID
 	IF LEN(@ParentUserID_6) > 20
 	BEGIN
-		RAISERROR('ParentUserID above maximum of 20 characters', 14, 1)
-		RETURN 1
+		PRINT('ParentUserID above maximum of 20 characters')
+		RETURN 10
 	END
 
 	--Actual Procedure--

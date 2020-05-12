@@ -3,8 +3,9 @@
 -- Create date: May 6th, 2020
 -- Description:	Procedure to Delete from the ClassCalendar Table.
 -- =============================================
+--Demo
 
-EXEC delete_ClassCalendar 6
+EXEC delete_ClassCalendar 26
 select * from ClassCalendar
 
 USE CalendarDB
@@ -16,21 +17,27 @@ IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'delete_ClassCa
 GO
 
 CREATE PROCEDURE delete_ClassCalendar(
-@ClassCalendarID_1 int,
-@Msg nvarchar(MAX) = null OUTPUT
+@ClassCalendarID_1 int
 )
 AS
-BEGIN TRY
+IF NOT EXISTS 
+(
+SELECT ClassCalendarID
+FROM ClassCalendar
+WHERE ClassCalendarID = @ClassCalendarID_1)
+BEGIN  
+	-- Return 99 to the calling program to indicate failure.  
+	PRINT N'An error occurred deleting the class calendar information.';  
+	RETURN 99;  
+END
+ELSE 
 	DELETE FROM ClassCalendar
 	WHERE ClassCalendarID = @ClassCalendarID_1
-
-	SET @Msg = 'Class Calendar Deleted Successfully'
-
-END TRY
-BEGIN CATCH  
-    SELECT ERROR_MESSAGE() AS ErrorMessage;  
-END CATCH;  
-GO
+    BEGIN  
+        -- Return 0 to the calling program to indicate success.  
+        PRINT N'The class calendar has been deleted.';  
+        RETURN 0;  
+    END;  
 
 -- Grant usage to the app user (needs to happen again when it gets deleted and re-created)
 GRANT EXECUTE ON [delete_ClassCalendar] TO appUserCalendarDB;

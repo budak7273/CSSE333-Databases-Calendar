@@ -4,7 +4,7 @@
 -- Description:	Procedure to Insert into the ClassCalendar Table.
 -- =============================================
 -- Demo: Example with minimum parameters specified
-
+/*
 	EXEC [insert_ClassCalendar] 
 	@CalendarColor_1 = 1234,
 	@ClassTime_2 = '11:00',
@@ -12,7 +12,7 @@
 	@ParentUserID_4 = 'DemoUser'
 
 	select * from ClassCalendar
-
+*/
 
 
 USE CalendarDB
@@ -36,6 +36,20 @@ AS
 	SET NOCOUNT ON
 	PRINT 'DEBUG start'
 
+	--Check for ParentUserID
+	IF NOT EXISTS 
+	(
+	SELECT ParentUserID
+	FROM ClassCalendar
+	WHERE 
+	ParentUserID = @ParentUserID_4
+	)
+	BEGIN  
+	-- Return 99 to the calling program to indicate failure.  
+	PRINT N'An error occurred, ParentUserID does not exist.';  
+	RETURN 99;  
+	END
+
 	--Check paramters that aren't allowed to be null
 	IF @CalendarColor_1 IS NULL
 	BEGIN
@@ -44,40 +58,41 @@ AS
 
 	IF @ClassTime_2 is NULL
 	BEGIN
-		RAISERROR('ClassTime cannot be null', 14, 1)
-		RETURN 1
+		PRINT('ClassTime cannot be null')
+		RETURN 2
 	END
 
 	IF @ClassName_3 is NULL
 	BEGIN
-		RAISERROR('ClassName cannot be null', 14, 1)
-		RETURN 1
+		PRINT('ClassName cannot be null')
+		RETURN 3
 	END
 
 	IF @ParentUserID_4 is NULL
 	BEGIN
-		RAISERROR('ParentUserID cannot be null', 14, 1)
+		PRINT('ParentUserID cannot be null')
+		RETURN 4
 	END
 
 	--Check if CalendarColor is positive int
 	IF @CalendarColor_1 < 0
 	BEGIN
-		RAISERROR('CalendarColor must be positive integer of 0 or greater', 14, 1)
-		RETURN 1
+		PRINT('CalendarColor must be positive integer of 0 or greater')
+		RETURN 5
 	END
 
 	--Check max length on ClassName
 	IF LEN(@ClassName_3) > 20
 	BEGIN
-		RAISERROR('ClassName above maximum of 20 characters', 14, 1)
-		RETURN 1
+		PRINT('ClassName above maximum of 20 characters')
+		RETURN 6
 	END
 
 	--Check max length on ParentUserID
 	IF LEN(@ParentUserID_4) > 20
 	BEGIN
-		RAISERROR('ParentUserID above maximum of 20 characters', 14, 1)
-		RETURN 1
+		PRINT('ParentUserID above maximum of 20 characters')
+		RETURN 7
 	END
 
 	--Actual Procedure--
@@ -104,7 +119,7 @@ AS
 	IF @Status <> 0 
 	BEGIN
 		-- Return error code to the calling program to indicate failure.
-		RAISERROR('An error occurred inserting the Class Calendar.', 14, @Status)
+		PRINT('An error occurred inserting the Class Calendar.')
 		RETURN @Status
 	END
 	ELSE

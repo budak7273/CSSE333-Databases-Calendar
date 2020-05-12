@@ -3,10 +3,11 @@
 -- Create date: May 6th, 2020
 -- Description:	Procedure to Update the ClassSection Table.
 -- =============================================
-
-EXEC update_ClassSection 3, 'CSSE333', 02, 'Databases', 0, 2020, 'DemoUser'
+Demo:
+/*
+EXEC update_ClassSection 4, 'CSSE333', 02, 'Databases', 0, 2020, 'DemoUser'
 select * from ClassSection
-
+*/
 USE CalendarDB
 GO
 
@@ -22,11 +23,23 @@ CREATE PROCEDURE update_ClassSection (
 @ClassName_3 nvarchar(20), 
 @IsPrivate_4 bit, 
 @SchoolYear_5 smallint, 
-@ParentUserID_6 varchar(20),
-@Msg nvarchar(MAX) = null OUTPUT
+@ParentUserID_6 varchar(20)
 )
 AS
-BEGIN TRY
+IF NOT EXISTS 
+(
+SELECT ClassSectionID
+FROM ClassSection
+WHERE 
+ClassSectionID = @ClassSectionID_1
+)
+
+BEGIN  
+	-- Return 99 to the calling program to indicate failure.  
+	PRINT N'An error occurred updating the class section information.';  
+	RETURN 99;  
+END
+ELSE 
 	UPDATE ClassSection
 	SET
 	CourseNumber = @CourseNumber_1,
@@ -37,13 +50,14 @@ BEGIN TRY
 	ParentUserID = @ParentUserID_6
 
 	WHERE ClassSectionID = @ClassSectionID_1
-		SET @Msg = 'ClassSection Updated Successfully!'
-
-END TRY
-BEGIN CATCH  
-    SELECT ERROR_MESSAGE() AS ErrorMessage;  
-END CATCH;  
+    BEGIN  
+        -- Return 0 to the calling program to indicate success.  
+        PRINT N'The class section has been updated.';  
+        RETURN 0;  
+    END;  
 GO
+
+
 
 -- Grant usage to the app user (needs to happen again when it gets deleted and re-created)
 GRANT EXECUTE ON [update_ClassSection] TO appUserCalendarDB;

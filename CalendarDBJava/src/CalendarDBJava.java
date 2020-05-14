@@ -18,12 +18,16 @@ public class CalendarDBJava extends JFrame {
     private MonthView monthView;
 
     private ImportHandler importHandler;
+    private CalendarSharingHandler sharingHandler;
 
     private ArrayList<Assignment> assignmentList;
 
     //
     private String username;
     private String password;
+    
+    private static final String SERVER_NAME = "golem.csse.rose-hulman.edu";
+    private static final String DATABASE_NAME = "CalendarDB";
     
 
     public CalendarDBJava() {
@@ -43,25 +47,59 @@ public class CalendarDBJava extends JFrame {
         container.setBackground(Color.BLUE);
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        
-        dbConnectService = new DatabaseConnectionService("golem.csse.rose-hulman.edu", "CalendarDB");
+        dbConnectService = new DatabaseConnectionService(SERVER_NAME, DATABASE_NAME);
         assignmentService = new AssignmentService(dbConnectService); //TODO close this connection eventually, which can probably happen earlier than close
         
-        importHandler = new ImportHandler("golem.csse.rose-hulman.edu", "CalendarDB");
+        importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME);
+        sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, username);
 
-        JButton b=new JButton("Upload iCal File");
-        b.addActionListener(new ActionListener(){
+        JButton uploadiCalButton=new JButton("Upload iCal File");
+        uploadiCalButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
                 importHandler.promptICalImport();
-                assignmentList = assignmentService.getAllAssignmentsForUser(username); // TODO maybe move db connection outside paint method?
-                monthView = new MonthView(assignmentList);
-                paint(container.getGraphics());
+                redraw();
             }
 
         });
-        b.setBounds(50,100,95,30);
-        container.add(b);
+        uploadiCalButton.setBounds(50,100,95,30);
+        container.add(uploadiCalButton);
+        
+        JButton followCalendarButton =new JButton("Follow Calendar");
+        followCalendarButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+            	sharingHandler.followCalendar();
+                redraw();
+            }
+
+        });
+        followCalendarButton.setBounds(50,100,95,30);
+        container.add(followCalendarButton);
+        
+        JButton unfollowCalendarButton =new JButton("Unfollow Calendar");
+        unfollowCalendarButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+            	sharingHandler.unfollowCalendar();
+                redraw();
+            }
+
+        });
+        unfollowCalendarButton.setBounds(50,100,95,30);
+        container.add(unfollowCalendarButton);
+        
+        JButton listCalendarsButton =new JButton("List all Calendars");
+        listCalendarsButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+            	sharingHandler.listAllCalendars();
+                redraw();
+            }
+
+        });
+        listCalendarsButton.setBounds(50,100,95,30);
+        container.add(listCalendarsButton);
 
         assignmentList = assignmentService.getAllAssignmentsForUser(username); // TODO maybe move db connection outside paint method?
         monthView = new MonthView(assignmentList);
@@ -78,6 +116,12 @@ public class CalendarDBJava extends JFrame {
         setVisible(true);
     }
 
+    private void redraw() {
+    	assignmentList = assignmentService.getAllAssignmentsForUser(username); // TODO maybe move db connection outside paint method?
+        monthView = new MonthView(assignmentList);
+        paint(container.getGraphics());
+    }
+    
     @SuppressWarnings("unused")
 	public static void main(String[] args) {
         CalendarDBJava application = new CalendarDBJava();

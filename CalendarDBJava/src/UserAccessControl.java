@@ -12,7 +12,7 @@ import java.util.Random;
 
 public class UserAccessControl {
     // TODO: flip this to true to not have to enter login credentials (for testing)
-    private static final boolean DEBUG_LOGIN = false;
+    private static final boolean DEBUG_LOGIN = true;
 
     private static final Random RANDOM = new SecureRandom();
     private static final Base64.Encoder enc = Base64.getEncoder();
@@ -31,6 +31,12 @@ public class UserAccessControl {
     }
 
     public void startupPrompt() {
+        if (DEBUG_LOGIN) {
+            username = "DemoUser";
+            password = "DemoPass";
+            return;
+        }
+
         // TODO: register OR login question prompt
 
         int selection = JOptionPane.showOptionDialog(null,
@@ -93,22 +99,34 @@ public class UserAccessControl {
         CallableStatement verifyHashCS = null;
         try {
             // Get Salt for Username
+            dbService.connect();
             saltCS = dbService.getConnection().prepareCall("{? = CALL get_Salt_for_User(?)}");
             saltCS.registerOutParameter(1, Types.INTEGER);
             saltCS.setString(2, username);
 
             // Execute Query to get Salt
             ResultSet saltRS = saltCS.executeQuery();
+            int saltStatus = saltCS.getInt(1);
             saltCS.close();
-            int returnedStatus = saltCS.getInt(1);
+            
+            if (saltStatus != 0) {
+                System.out.printf("ERROR: saltStatus = %d", saltStatus);
+            }
 
-            // Check status (does username exist?)
-            if (returnedStatus != 0) {
+            // Check if user exists (result set is empty if no user)
+            if (!saltRS.next()) {
+                System.out.println("ERROR: saltRS is empty");
                 return false;
             }
 
             // Parse Salt from DB
             String saltString = saltRS.getString("Salt");
+            if (saltString == null) {
+                System.out.println("ERROR: saltRS is null");
+                return false;
+            }
+
+            System.out.printf("DB returned \"%s\" for saltString of user %s\n", saltString, username);
             byte[] salt = getBytesFromString(saltString);
 
             // Hash user supplied password with Salt from DB.
@@ -122,8 +140,8 @@ public class UserAccessControl {
 
             // Execute Query to get Salt
             verifyHashCS.execute();
+            int returnedStatus = verifyHashCS.getInt(1);
             verifyHashCS.close();
-            returnedStatus = verifyHashCS.getInt(1);
 
             // Check status (was password valid?)
             return returnedStatus == 0;

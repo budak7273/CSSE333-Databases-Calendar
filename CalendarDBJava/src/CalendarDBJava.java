@@ -13,7 +13,7 @@ public class CalendarDBJava extends JFrame {
     private Container container;
 
     private MonthView monthView = new MonthView();
-    private UserAccessControl userAccessControl = new UserAccessControl();
+    private UserAccessControl userAccessControl;
 
     private ImportHandler importHandler;
     private CalendarSharingHandler sharingHandler;
@@ -30,12 +30,13 @@ public class CalendarDBJava extends JFrame {
         container.setLayout(new FlowLayout());
         container.setBackground(monthView.getMonthViewBackgroundColor());
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-        userAccessControl.loginPrompt();
-        monthView.setCurrentMonth();
         
         dbConnectService = new DatabaseConnectionService(SERVER_NAME, DATABASE_NAME);
         assignmentService = new AssignmentService(dbConnectService); //TODO close this connection eventually, which can probably happen earlier than window close
+        userAccessControl = new UserAccessControl(dbConnectService);
+
+        userAccessControl.loginPrompt();
+        monthView.setCurrentMonth();
         
         importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
         sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());

@@ -14,6 +14,7 @@ public class AssignmentService {
     public ArrayList<Assignment> getAllAssignmentsForUser(String username) {
         ArrayList<Assignment> assignments = new ArrayList<>();
 
+        System.out.printf("Fetching assignments for User %s", username);
         dbService.connect();
         Connection con = dbService.getConnection();
         PreparedStatement getAllAssignmentsPS = null;
@@ -38,7 +39,7 @@ public class AssignmentService {
                 Assignment thisAssignment = new Assignment(AssignmentID, EventName, EventDate, EventProgress, Type, EventSpecificColor, ParentClassCalendarID, ParentClassSectionID, ImportSourceID);
                 assignments.add(thisAssignment);
             }
-            System.out.printf("Database Returned %d Assignments for user %s.\n", assignments.size(), username);
+            System.out.printf("\tDatabase Returned %d Assignments for user %s.\n", assignments.size(), username);
 
 //            Assignment dummyAssignment = new Assignment(1,"Dummy Event", new Date(2020, 4,28), 20, "Exam", 0x66FF69, 22, 323, 45);
 //            assignments.add(dummyAssignment);

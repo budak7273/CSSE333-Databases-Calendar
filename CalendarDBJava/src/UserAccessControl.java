@@ -122,11 +122,10 @@ public class UserAccessControl {
             oldHash = JOptionPane.showInputDialog("GOD MODE: Please enter Old Hash");
         }
 
-        System.out.printf("Changing %s's password hash from %s to %s", username, oldHash, newHash);
-        
         CallableStatement updatePasswordCS = null;
         try {
             // Build Password Change Request
+            System.out.printf("Password (Hash) Change Request for User %s from %s to %s...", username, oldHash, newHash);
             dbService.connect();
             updatePasswordCS = dbService.getConnection().prepareCall("{? = CALL update_User_Password(?, ?, ?)}");
             updatePasswordCS.registerOutParameter(1, Types.INTEGER);
@@ -178,6 +177,7 @@ public class UserAccessControl {
         CallableStatement verifyHashCS = null;
         try {
             // Send userHash to DB to verify.
+            System.out.printf("Validating Password Hash for user %s, hash %s...", username, userHash);
             dbService.connect();
             verifyHashCS = dbService.getConnection().prepareCall("{? = CALL verify_Hash_for_User(?, ?)}");
             verifyHashCS.registerOutParameter(1, Types.INTEGER);
@@ -225,6 +225,7 @@ public class UserAccessControl {
         CallableStatement registerCS = null;
         try {
             // Call register_User SP
+            System.out.printf("Registering New User %s, with username %s with salt \"%s\", hash \"%s\"...", userRealName, username, newSaltString, newHash);
             dbService.connect();
             registerCS = dbService.getConnection().prepareCall("{? = CALL register_User(?, ?, ?, ?)}");
             registerCS.registerOutParameter(1, Types.INTEGER);
@@ -261,6 +262,7 @@ public class UserAccessControl {
         CallableStatement saltCS = null;
         try {
             // Get Salt for Username
+            System.out.printf("Getting Salt for user %s...", username);
             dbService.connect();
             saltCS = dbService.getConnection().prepareCall("{CALL get_Salt_for_User(?)}");
             saltCS.setString(1, username);
@@ -287,7 +289,7 @@ public class UserAccessControl {
                 return null;
             }
 
-            System.out.printf("DB returned \"%s\" for saltString of user %s\n", saltString, username);
+            System.out.printf("\tDB returned \"%s\" for saltString of user %s\n", saltString, username);
             salt = getBytesFromString(saltString);
         } catch (SQLException e) {
             e.printStackTrace();

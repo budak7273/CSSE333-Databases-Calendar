@@ -50,7 +50,7 @@ public class CalendarDBJava extends JFrame {
         dbConnectService = new DatabaseConnectionService(SERVER_NAME, DATABASE_NAME);
         assignmentService = new AssignmentService(dbConnectService); //TODO close this connection eventually, which can probably happen earlier than close
         
-        importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME);
+        importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME, username);
         sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, username);
 
         JButton uploadiCalButton=new JButton("Upload iCal File");

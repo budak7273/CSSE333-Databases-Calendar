@@ -32,10 +32,12 @@ public class ImportHandler {
 	
 	String serverNameToUse;
 	String databaseNameToUse;
+	String username;
 	
-	public ImportHandler(String serverName, String databaseName) {
+	public ImportHandler(String serverName, String databaseName, String usernameForImport) {
 		serverNameToUse = serverName;
 		databaseNameToUse = databaseName;
+		username = usernameForImport;
 	}
 	
 	public boolean promptICalImport() {
@@ -72,6 +74,7 @@ public class ImportHandler {
 	 */
 	public boolean addAssignmentFromICalParse(VEvent event, int parentClassCalendarID, int importSourceID) {
         String paramQueryString = "{call insert_Assignment(?,?,?,?,?,?,?,?)}";
+        System.out.println("Using calID " + parentClassCalendarID + " isID " + importSourceID);
         
         PreparedStatement paramQueryPS = null;
 		try {
@@ -85,9 +88,9 @@ public class ImportHandler {
 			paramQueryPS.setByte(3, (byte) 0);
 			paramQueryPS.setString(4, null);
 			paramQueryPS.setInt(5, 0);
-			paramQueryPS.setInt(6, 2);//TODO set this to the passed parentClassCalendarID instead of testing ID#2
-			paramQueryPS.setInt(7, 4); //TODO set this to the passed parentClassSectionID instead of testing ID#3
-			paramQueryPS.setInt(8, 1); //TODO set this to the passed importSourceID instead of testing ID#1
+			paramQueryPS.setInt(6, parentClassCalendarID);//for testing, use ID#2
+			paramQueryPS.setInt(7, 4); //TODO set this to the passed parentClassSectionID instead of testing ID#4
+			paramQueryPS.setInt(8, importSourceID); //for testing, use ID#1
 			
 	        int rCode = paramQueryPS.executeUpdate(); //for some reason this returns 1 for success and -1 for failure. This is not documented seemingly anywhere I could find?
 	        //System.out.println(rCode);
@@ -100,7 +103,7 @@ public class ImportHandler {
 	        System.out.println("Upload of assignment " + event.getSummary().getValue() + " succeeded");
 	        return true;
 		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null, "An error occurred in adding the restaurant. See the printed stack trace.");
+			JOptionPane.showMessageDialog(null, "An error occurred in adding the assignment. See the printed stack trace.");
 			e.printStackTrace();
 		} finally {
 			try {
@@ -136,9 +139,7 @@ public class ImportHandler {
 			e.printStackTrace();
 			return false;
 		}
-		
-		//System.out.println("READ:\n\r" + str);
-		
+
 		ICalendar ical = Biweekly.parse(str).first();
 		
 		if(ical == null) {
@@ -147,17 +148,69 @@ public class ImportHandler {
 		} else {
 			List<VEvent> allEvents = ical.getEvents();
 			System.out.println("This iCal file contains " + allEvents.size() + " events.");
+			
+			Token newIDsToUse = prepareForImport();
+			if(newIDsToUse == null)
+				return false;
+			
 			for (VEvent thisEvent : allEvents) {
 				try {
 					printEventDetails(thisEvent, false);
 					System.out.println("attempting to upload...");
-					addAssignmentFromICalParse(thisEvent, 0, 0); //TODO get and use parent cal id and import source ID
+					addAssignmentFromICalParse(thisEvent, newIDsToUse.classCalendarID, newIDsToUse.importSourceID);
 				} catch (NullPointerException ex) {
-					System.out.println("A property of this event failed to be displayed.");
+					System.out.println("A property of this event failed to be processed.");
 				}
 			}
 		}
 		return true;
+	}
+	
+	private class Token {
+		public int importSourceID;
+		public int classCalendarID; 
+		
+		public Token(int ccID, int isID) {
+			importSourceID = isID;
+			classCalendarID = ccID;
+		}
+	}
+	
+	private Token prepareForImport() {
+		String paramQueryString = "{call prepareImport(?,?)}";
+        
+        PreparedStatement paramQueryPS = null;
+		try {
+			paramQueryPS = this.dbService.getConnection().prepareStatement(paramQueryString);
+			
+			paramQueryPS.setString(1, username);
+			paramQueryPS.setString(2, JOptionPane.showInputDialog("Enter a name to use for the imported calendar"));
+			
+			int calID = -1;
+			int isID = -1;
+			
+			ResultSet rs = paramQueryPS.executeQuery();
+            while (rs.next()) {
+                calID = rs.getInt("NewCalendarID");
+                isID = rs.getInt("NewImportSourceID");
+            }
+            System.out.println("New calendar " + calID + " and import souce " + isID + " created for import process");
+            return new Token(calID, isID);
+            
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "An error occurred in preparing for the import. See the printed stack trace.");
+			e.printStackTrace();
+		} finally {
+			try {
+				if (paramQueryPS != null) 
+					paramQueryPS.close();
+			} catch (SQLException e) {
+				JOptionPane.showMessageDialog(null, "An error occurred in closing the statement. See the printed stack trace.");
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Preparing for import FAILED");
+        return null;
 	}
 	
 	/**

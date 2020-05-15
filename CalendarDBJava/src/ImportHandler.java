@@ -59,11 +59,8 @@ public class ImportHandler {
 				System.out.println("Biweekly failed to parse the file");
 				return false;
 			}
-			
 		}
 		return false;
-		
-		
 	}
 	
 	/**

@@ -44,8 +44,10 @@ AS
 	SELECT *
 	FROM [Assignment] asn
 		INNER JOIN [ClassCalendar] ccal
-	ON asn.ParentClassCalendarID = ccal.ClassCalendarID
-	WHERE ccal.ParentUserID = @Username_1
+		ON asn.ParentClassCalendarID = ccal.ClassCalendarID
+		INNER JOIN [UserCalendarSharing] ucalShare
+		ON ucalShare.ClassCalendarID = ccal.ClassCalendarID
+	WHERE ccal.ParentUserID = @Username_1 OR ucalShare.Username = @Username_1
 
 	--End Actual Procedure--
 

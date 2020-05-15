@@ -1,5 +1,6 @@
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 
@@ -108,6 +109,43 @@ public class CalendarSharingHandler {
 	
 	public void listAllCalendars() {
 		connect();
+		
+		String paramQueryString = "{call get_ClassCalendar_List}";
+        
+        PreparedStatement paramQueryPS = null;
+		try {
+			paramQueryPS = this.dbService.getConnection().prepareStatement(paramQueryString);
+			StringBuilder sb = new StringBuilder();
+			sb.append("CalendarID   Name   Creator\n");
+			int counter = 0;
+			
+			ResultSet rs = paramQueryPS.executeQuery();
+            while (rs.next()) {
+            	sb.append(rs.getInt("CalendarID"));
+            	sb.append("   ");
+            	sb.append(rs.getString("Name"));
+            	sb.append("   ");
+            	sb.append(rs.getString("Creator"));
+            	sb.append('\n');
+            	counter++;
+            }
+            
+            System.out.printf("Database Returned %d ClassCalendars.\n", counter);
+	        JOptionPane.showMessageDialog(null, sb.toString());
+		} catch (SQLException e) {
+			System.out.println("Listing FAILED");
+			JOptionPane.showMessageDialog(null, "An error occurred in obtaining the calendar list. See the printed stack trace.");
+			e.printStackTrace();
+		} finally {
+			try {
+				if (paramQueryPS != null) 
+					paramQueryPS.close();
+			} catch (SQLException e) {
+				System.out.println("Listing FAILED");
+				JOptionPane.showMessageDialog(null, "An error occurred in closing the statement. See the printed stack trace.");
+				e.printStackTrace();
+			}
+		}
 		
 		dbService.closeConnection();
 	}

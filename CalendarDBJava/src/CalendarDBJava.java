@@ -89,9 +89,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 importHandler.promptICalImport();
-                assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername()); // TODO maybe move db connection outside paint method?
-                monthView.updateAssignmentList(assignmentList);
-                paint(container.getGraphics());
+                redrawAssignments();
             }
         });
         uploadIcalButton.setBounds(50,100,95,30);
@@ -102,7 +100,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.followCalendar();
-                repaint();
+                redrawAssignments();
             }
 
         });
@@ -114,7 +112,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.unfollowCalendar();
-                repaint();
+                redrawAssignments();
             }
 
         });
@@ -160,5 +158,11 @@ public class CalendarDBJava extends JFrame {
     public void paint(Graphics g) {
         super.paint(g);
         monthView.draw(g, getSize());
+    }
+    
+    private void redrawAssignments() {
+    	assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername()); // TODO maybe move db connection outside paint method?
+        monthView.updateAssignmentList(assignmentList);
+        paint(container.getGraphics());
     }
 }

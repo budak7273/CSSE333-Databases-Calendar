@@ -121,6 +121,18 @@ public class CalendarDBJava extends JFrame {
         unfollowCalendarButton.setBounds(50,100,95,30);
         container.add(unfollowCalendarButton);
 
+        JButton listFollowedCalendarsButton = new JButton("Followed Calendars");
+        listFollowedCalendarsButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                sharingHandler.listAllFollowedCalendars();
+                repaint();
+            }
+
+        });
+        listFollowedCalendarsButton.setBounds(50,100,95,30);
+        container.add(listFollowedCalendarsButton);
+        
         JButton listCalendarsButton = new JButton("List all Calendars");
         listCalendarsButton.addActionListener(new ActionListener(){
             @Override

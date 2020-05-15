@@ -39,8 +39,10 @@ AS
 
 	--Actual Procedure--
 
-	SELECT calShare.ClassCalendarID
+	SELECT ccal.ClassCalendarID as [CalendarID], ccal.ClassName as [Name], ccal.ParentUserID as [Creator]
 	FROM [UserCalendarSharing] calShare
+		INNER JOIN [ClassCalendar] ccal
+		ON ccal.ClassCalendarID = calShare.ClassCalendarID
 	WHERE calShare.Username = @Username_1
 
 	--End Actual Procedure--

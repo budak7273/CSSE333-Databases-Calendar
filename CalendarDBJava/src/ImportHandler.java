@@ -73,7 +73,7 @@ public class ImportHandler {
 	 * @return
 	 */
 	public boolean addAssignmentFromICalParse(VEvent event, int parentClassCalendarID, int importSourceID) {
-        String paramQueryString = "{call insert_Assignment(?,?,?,?,?,?,?,?)}";
+        String paramQueryString = "{call insert_Assignment(?,?,?,?,?,?,?,?,?)}";
         System.out.println("Using calID " + parentClassCalendarID + " isID " + importSourceID);
         
         PreparedStatement paramQueryPS = null;
@@ -91,6 +91,7 @@ public class ImportHandler {
 			paramQueryPS.setInt(6, parentClassCalendarID);//for testing, use ID#2
 			paramQueryPS.setInt(7, 4); //TODO set this to the passed parentClassSectionID instead of testing ID#4
 			paramQueryPS.setInt(8, importSourceID); //for testing, use ID#1
+			paramQueryPS.setString(9, event.getDescription().getValue());
 			
 	        int rCode = paramQueryPS.executeUpdate(); //for some reason this returns 1 for success and -1 for failure. This is not documented seemingly anywhere I could find?
 	        //System.out.println(rCode);

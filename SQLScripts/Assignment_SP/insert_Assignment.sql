@@ -30,7 +30,8 @@ CREATE PROCEDURE [insert_Assignment]
  @EventSpecificColor_5		[int] = null,
  @ParentClassCalendarID_6	[int],
  @ParentClassSectionID_7	[int] = null, --TODO were we going to be removing this, since there is already a link to it via the class calendar?
- @ImportSourceID_8			[int] = null)
+ @ImportSourceID_8			[int] = null,
+ @EventDescription_9		[varchar](257) = null)
 AS
 	-- Supress row count messages
 	SET NOCOUNT ON
@@ -39,27 +40,34 @@ AS
 	--Check parameters that aren't allowed to be null
 	IF @EventDate_2 IS NULL
 	BEGIN
-		RAISERROR('EventDate can not be null', 14, 1)
+		PRINT N'EventDate can not be null'
 		RETURN 1
 	END
 
 	IF @ParentClassCalendarID_6 IS NULL
 	BEGIN
-		RAISERROR('ParentClassCalendarID can not be null', 14, 1)
+		PRINT N'ParentClassCalendarID can not be null'
 		RETURN 1
 	END
 
 	--Check max length on EventName
 	IF LEN(@EventName_1) > 75
 	BEGIN
-		RAISERROR('EventName above maximum of 75 characters', 14, 1)
+		PRINT N'EventName above maximum of 75 characters'
 		RETURN 1
 	END
 
 	--Check max length on Type
 	IF LEN(@Type_4) > 20
 	BEGIN
-		RAISERROR('Type above maximum of 20 characters', 14, 1)
+		PRINT N'Type above maximum of 20 characters'
+		RETURN 1
+	END
+
+	--Check max length on EventDescription
+	IF LEN(@EventDescription_9) > 257
+	BEGIN
+		PRINT N'EventDescription above maximum of 257 characters'
 		RETURN 1
 	END
 
@@ -71,7 +79,7 @@ AS
 	--Check bounds on progress
 	ELSE IF @EventProgress_3 < 0 OR @EventProgress_3 > 100
 	BEGIN
-		RAISERROR('EventProgress outside of bounds: 0 to 100 inclusive', 14, 1)
+		PRINT N'EventProgress outside of bounds: 0 to 100 inclusive'
 		RETURN 1
 	END
 
@@ -80,8 +88,8 @@ AS
 	--Actual Procedure--
 
 	INSERT INTO [Assignment]
-		       ([EventName],	[EventDate],	[EventProgress],	[Type],		[EventSpecificColor],	[ParentClassCalendarID],	[ParentClassSectionID],		[ImportSourceID])
-		VALUES (@EventName_1,	@EventDate_2,	@EventProgress_3,	@Type_4,	@EventSpecificColor_5,	@ParentClassCalendarID_6,	@ParentClassSectionID_7,	@ImportSourceID_8)
+		       ([EventName],	[EventDate],	[EventProgress],	[Type],		[EventSpecificColor],	[ParentClassCalendarID],	[ParentClassSectionID],		[ImportSourceID],	[EventDescription])
+		VALUES (@EventName_1,	@EventDate_2,	@EventProgress_3,	@Type_4,	@EventSpecificColor_5,	@ParentClassCalendarID_6,	@ParentClassSectionID_7,	@ImportSourceID_8,	@EventDescription_9)
 
 	--End Actual Procedure--
 
@@ -91,7 +99,7 @@ AS
 	IF @Status <> 0 
 	BEGIN
 		-- Return error code to the calling program to indicate failure.
-		RAISERROR('An error occurred inserting the assignment.', 14, @Status)
+		PRINT N'An error occurred inserting the assignment.'
 		RETURN @Status
 	END
 	ELSE

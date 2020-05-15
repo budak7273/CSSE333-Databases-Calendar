@@ -131,10 +131,58 @@ public class CalendarSharingHandler {
             }
             
             System.out.printf("Database Returned %d ClassCalendars.\n", counter);
-	        JOptionPane.showMessageDialog(null, sb.toString());
+            JOptionPane.showMessageDialog(null, sb.toString(), "Avalible ClassCalendars", JOptionPane.INFORMATION_MESSAGE);
 		} catch (SQLException e) {
 			System.out.println("Listing FAILED");
 			JOptionPane.showMessageDialog(null, "An error occurred in obtaining the calendar list. See the printed stack trace.");
+			e.printStackTrace();
+		} finally {
+			try {
+				if (paramQueryPS != null) 
+					paramQueryPS.close();
+			} catch (SQLException e) {
+				System.out.println("Listing FAILED");
+				JOptionPane.showMessageDialog(null, "An error occurred in closing the statement. See the printed stack trace.");
+				e.printStackTrace();
+			}
+		}
+		
+		dbService.closeConnection();
+	}
+	
+	public void listAllFollowedCalendars() {
+		connect();
+		
+		String paramQueryString = "{call get_All_Followed_Calendars_Of_User(?)}";
+        
+		
+		
+        PreparedStatement paramQueryPS = null;
+		try {
+			paramQueryPS = this.dbService.getConnection().prepareStatement(paramQueryString);
+			
+			paramQueryPS.setString(1, username);
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("CalendarID   Name   Creator\n");
+			int counter = 0;
+			
+			ResultSet rs = paramQueryPS.executeQuery();
+            while (rs.next()) {
+            	sb.append(rs.getInt("CalendarID"));
+            	sb.append("   ");
+            	sb.append(rs.getString("Name"));
+            	sb.append("   ");
+            	sb.append(rs.getString("Creator"));
+            	sb.append('\n');
+            	counter++;
+            }
+            
+            System.out.printf("Database Returned %d Followed ClassCalendars.\n", counter);
+	        JOptionPane.showMessageDialog(null, sb.toString(), "Followed ClassCalendars", JOptionPane.INFORMATION_MESSAGE);
+		} catch (SQLException e) {
+			System.out.println("Listing FAILED");
+			JOptionPane.showMessageDialog(null, "An error occurred in obtaining the followed calendar list. See the printed stack trace.");
 			e.printStackTrace();
 		} finally {
 			try {

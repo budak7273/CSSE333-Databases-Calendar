@@ -32,7 +32,7 @@ public class CalendarDBJava extends JFrame {
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         
         dbConnectService = new DatabaseConnectionService(SERVER_NAME, DATABASE_NAME);
-        assignmentService = new AssignmentService(dbConnectService); //TODO close this connection eventually, which can probably happen earlier than window close
+        assignmentService = new AssignmentService(dbConnectService);
         userAccessControl = new UserAccessControl(dbConnectService);
 
         userAccessControl.startupPrompt();
@@ -99,7 +99,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 importHandler.promptICalImport();
-                redrawAssignments();
+                updateAndRedrawAssignments();
             }
         });
         uploadIcalButton.setBounds(50,100,95,30);
@@ -110,7 +110,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.followCalendar();
-                redrawAssignments();
+                updateAndRedrawAssignments();
             }
 
         });
@@ -122,7 +122,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.unfollowCalendar();
-                redrawAssignments();
+                updateAndRedrawAssignments();
             }
 
         });
@@ -134,7 +134,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.listAllFollowedCalendars();
-                repaint();
+                updateAndRedrawAssignments();
             }
 
         });
@@ -146,14 +146,14 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.listAllCalendars();
-                repaint();
+                updateAndRedrawAssignments();
             }
 
         });
         listCalendarsButton.setBounds(50,100,95,30);
         container.add(listCalendarsButton);
 
-        assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername()); // TODO maybe move db connection outside paint method?
+        assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername());
         monthView.updateAssignmentList(assignmentList);
 
         setVisible(true);   // Fixes buttons not rendering.
@@ -170,9 +170,9 @@ public class CalendarDBJava extends JFrame {
         monthView.draw(g, getSize());
     }
     
-    private void redrawAssignments() {
-    	assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername()); // TODO maybe move db connection outside paint method?
+    private void updateAndRedrawAssignments() {
+    	assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername());
         monthView.updateAssignmentList(assignmentList);
-        paint(container.getGraphics());
+        repaint();
     }
 }

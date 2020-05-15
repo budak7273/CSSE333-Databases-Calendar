@@ -131,7 +131,7 @@ public class CalendarSharingHandler {
             }
             
             System.out.printf("Database Returned %d ClassCalendars.\n", counter);
-            JOptionPane.showMessageDialog(null, sb.toString(), "Avalible ClassCalendars", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, sb.toString(), "Available ClassCalendars", JOptionPane.INFORMATION_MESSAGE);
 		} catch (SQLException e) {
 			System.out.println("Listing FAILED");
 			JOptionPane.showMessageDialog(null, "An error occurred in obtaining the calendar list. See the printed stack trace.");

@@ -28,7 +28,6 @@ import biweekly.util.ListMultimap;
 
 public class ImportHandler {
 
-	public int RUN_COUNTER = 0;
 	private DatabaseConnectionService dbService;
 	
 	String serverNameToUse;
@@ -62,10 +61,6 @@ public class ImportHandler {
 			}
 			
 		}
-		
-		/*VEvent tmp = new VEvent();
-		tmp.setSummary("DemoJavaVEvent");
-		return addAssignmentFromICalParse(tmp, 0, 0);*/
 		return false;
 		
 		

@@ -34,21 +34,45 @@ public class MonthView {
     /**
      * Draws the current (IRL) month.
      */
-    public void drawMonth(Graphics g) {
+    public void setCurrentMonth() {
         Date currentDate = new Date();
-        drawMonth(g, currentDate.getYear(), currentDate.getMonth());
+        setMonth(currentDate.getYear(), currentDate.getMonth());
     }
 
     /**
-     * Draws a given Month.
-     * @param year the year of the month to draw (in normal format, ex 2020)
-     * @param month the month (zero indexed, like Calendar.MONTH_NAME)
+     * Advances to the next month. Must call setCurrentMonth(g) or setMonth(year, month) first if you dont want to start
+     * in 0 AD...
      */
-    public void drawMonth(Graphics g, int year, int month) {
+    public void setNextMonth() {
+        int nextMonth = month + 1;
+        int nextMonthsYear = year;
+        if (nextMonth > Calendar.DECEMBER) {
+            nextMonth = Calendar.JANUARY;
+            nextMonthsYear++;
+        }
+        setMonth(nextMonthsYear, nextMonth);
+    }
+
+    /**
+     * Advances to the previous month. Must call setCurrentMonth(g) or setMonth(year, month) first if you dont want to start
+     * in 0 AD...
+     */
+    public void setPreviousMonth() {
+        int prevMonth = month - 1;
+        int prevMonthsYear = year;
+        if (prevMonth < Calendar.JANUARY) {
+            prevMonth = Calendar.DECEMBER;
+            prevMonthsYear--;
+        }
+        setMonth(prevMonthsYear, prevMonth);
+    }
+
+    /**
+     * Draws the currently stored month. setCurrentMonth() or setMonth(year, month) should probably be called before calling this.
+     * @param g
+     */
+    public void draw(Graphics g) {
         this.g = g;
-        this.year = year;
-        this.month = month;
-        updateMonth();
 
         g.setColor(monthViewBorderColor);
         g.fillRect(leftMargin, topMargin, monthWidth, monthHeight);
@@ -71,6 +95,18 @@ public class MonthView {
         }
     }
 
+
+    /**
+     * Draws a given Month.
+     * @param year the year of the month to draw (in normal format, ex 2020)
+     * @param month the month (zero indexed, like Calendar.MONTH_NAME)
+     */
+    public void setMonth(int year, int month) {
+        this.year = year;
+        this.month = month;
+        updateMonthProperties();
+    }
+
     private void drawDay(int x,  int y, int dayOfMonth) {
         // Day Rectangle
         g.setColor(dayColor);
@@ -90,8 +126,9 @@ public class MonthView {
         for (Assignment a : assignmentList) {
             if (a.getEventDate().getYear() == year - 1900 && a.getEventDate().getMonth() == month && a.getEventDate().getDate() == dayOfMonth) {
                 drawAssignment(a, x + 5, y + 30 + eventHeight * eventsDisplayed, dayWidth - 15, eventHeight);
+
                 eventsDisplayed++;
-                if (eventsDisplayed > maxEventsDisplayed) return;
+                if (eventsDisplayed >= maxEventsDisplayed) return;
             }
         }
     }
@@ -103,11 +140,13 @@ public class MonthView {
         g.drawString(assignment.getEventName(), x + horizontalDaySeparation, y + 20);
     }
 
-    private void updateMonth() {
-//        Date firstDayOfMonthDate = new Date(year, month, 1);
-//        firstDayOfMonth = firstDayOfMonthDate.getDay();
+    /**
+     * Updates the month's length and start day based on the stored month and year values.
+     */
+    private void updateMonthProperties() {
         Calendar cal = Calendar.getInstance();
         cal.set(year, month, 1);
+
         firstDayOfMonth = cal.get(Calendar.DAY_OF_WEEK);
         daysInMonth = cal.getActualMaximum(Calendar.DATE);
     }

@@ -181,47 +181,4 @@ public class MonthView {
     public Color getMonthViewBackgroundColor() {
         return monthViewBackgroundColor;
     }
-
-    /**
-     * adds Month Browsing Buttons to the container.
-     * @param container the
-     */
-    public void addMonthViewButtons(Container container) {
-        JButton prevMonthButton = new JButton("Prev. Month");
-        prevMonthButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                setPreviousMonth();
-                container.repaint();
-            }
-        });
-        prevMonthButton.setBounds(50,100,95,30);
-        container.add(prevMonthButton);
-
-        JButton currMonthButton = new JButton("Today");
-        currMonthButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                setCurrentMonth();
-                container.repaint();
-            }
-        });
-        currMonthButton.setBounds(50,100,95,30);
-        container.add(currMonthButton);
-
-
-
-        JButton nextMonthButton = new JButton("Next Month");
-        nextMonthButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                setNextMonth();
-                container.repaint();
-            }
-        });
-        nextMonthButton.setBounds(50,100,95,30);
-        container.add(nextMonthButton);
-    }
-
-
 }

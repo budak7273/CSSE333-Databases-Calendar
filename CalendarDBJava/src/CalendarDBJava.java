@@ -72,8 +72,6 @@ public class CalendarDBJava extends JFrame {
         todayButton.setBounds(50,100,95,30);
         container.add(todayButton);
 
-
-
         JButton nextMonthButton = new JButton("Next Month");
         nextMonthButton.addActionListener(new ActionListener(){
             @Override

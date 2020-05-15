@@ -1,4 +1,7 @@
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -7,23 +10,24 @@ public class MonthView {
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
     private Color dayColor = Color.BLACK;
     private Color monthViewBorderColor = Color.DARK_GRAY;
-    private Color monthViewBackgroundColor = new Color(0x0C1C6F);
+    private Color monthViewBackgroundColor = new Color(0x800000);
     private Color monthViewDateColor = Color.WHITE;
     private int monthWidth = 1400;
     private int monthHeight = 800;
     private int leftMargin = 25;
     private int rightMargin = 25;
-    private int topMargin = 25 + 22;     // + 22 accounts for Window Bar.
+    private int topMargin = 40 + 22;     // + 22 accounts for Window Bar.
     private int bottomMargin = 25;
     private int horizontalDaySeparation = 5;
     private int verticalDaySeparation = 5;
-    private int dayWidth = (monthWidth - horizontalDaySeparation) / 7;
-    private int dayHeight = (monthHeight - verticalDaySeparation) / 5;
+    private int dayWidth;
+    private int dayHeight;
     private Graphics g;
     private ArrayList<Assignment> assignmentList;
     private int maxEventsDisplayed = 3;
     private int firstDayOfMonth;
     private int daysInMonth;
+    private int weeksInMonth;
     private int year;
     private int month;
 
@@ -32,6 +36,15 @@ public class MonthView {
     }
 
     public MonthView() {
+
+    }
+
+    public void updateWindowDimensions(int width, int height) {
+        this.monthWidth = width - leftMargin - rightMargin;
+        this.monthHeight = height - topMargin - bottomMargin;
+
+        this.dayHeight = (this.monthHeight - this.verticalDaySeparation) / this.weeksInMonth;
+        this.dayWidth = (this.monthWidth - this.horizontalDaySeparation) / 7;
     }
 
     /**
@@ -71,8 +84,18 @@ public class MonthView {
     }
 
     /**
+     * Draws the currently stored month, and updates the window size.
+     * @param g the graphics window to draw on
+     * @param d the window dimensions
+     */
+    public void draw(Graphics g, Dimension d) {
+        updateWindowDimensions(d.width, d.height);
+        draw(g);
+    }
+
+    /**
      * Draws the currently stored month. setCurrentMonth() or setMonth(year, month) should probably be called before calling this.
-     * @param g
+     * @param g the graphics window to draw on
      */
     public void draw(Graphics g) {
         this.g = g;
@@ -84,9 +107,8 @@ public class MonthView {
 
         int dayOfMonth = 1;
         int j = firstDayOfMonth - 1;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < weeksInMonth; i++) {
             for (; j < 7; j++) {
-
                 int x = leftMargin + horizontalDaySeparation + dayWidth * j;
                 int y = topMargin + verticalDaySeparation + dayHeight * i;
                 drawDay(x, y, dayOfMonth);
@@ -100,9 +122,8 @@ public class MonthView {
         }
     }
 
-
     /**
-     * Draws a given Month.
+     * Sets the stored month to specified value.
      * @param year the year of the month to draw (in normal format, ex 2020)
      * @param month the month (zero indexed, like Calendar.MONTH_NAME)
      */
@@ -146,7 +167,7 @@ public class MonthView {
     }
 
     /**
-     * Updates the month's length and start day based on the stored month and year values.
+     * Updates the month's length, number of weeks, and start day based on the stored month and year values.
      */
     private void updateMonthProperties() {
         Calendar cal = Calendar.getInstance();
@@ -154,5 +175,53 @@ public class MonthView {
 
         firstDayOfMonth = cal.get(Calendar.DAY_OF_WEEK);
         daysInMonth = cal.getActualMaximum(Calendar.DATE);
+        weeksInMonth = cal.getActualMaximum(Calendar.WEEK_OF_MONTH);
     }
+
+    public Color getMonthViewBackgroundColor() {
+        return monthViewBackgroundColor;
+    }
+
+    /**
+     * adds Month Browsing Buttons to the container.
+     * @param container the
+     */
+    public void addMonthViewButtons(Container container) {
+        JButton prevMonthButton = new JButton("Prev. Month");
+        prevMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                setPreviousMonth();
+                container.repaint();
+            }
+        });
+        prevMonthButton.setBounds(50,100,95,30);
+        container.add(prevMonthButton);
+
+        JButton currMonthButton = new JButton("Today");
+        currMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                setCurrentMonth();
+                container.repaint();
+            }
+        });
+        currMonthButton.setBounds(50,100,95,30);
+        container.add(currMonthButton);
+
+
+
+        JButton nextMonthButton = new JButton("Next Month");
+        nextMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                setNextMonth();
+                container.repaint();
+            }
+        });
+        nextMonthButton.setBounds(50,100,95,30);
+        container.add(nextMonthButton);
+    }
+
+
 }

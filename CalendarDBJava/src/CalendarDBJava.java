@@ -24,23 +24,68 @@ public class CalendarDBJava extends JFrame {
     private static final String DATABASE_NAME = "CalendarDB";
 
     public CalendarDBJava() {
+        // Setting Swing and JFrame related properties.
         super("CalendarDB UI");
+        container = getContentPane();
+        container.setLayout(new FlowLayout());
+        container.setBackground(monthView.getMonthViewBackgroundColor());
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         userAccessControl.loginPrompt();
         monthView.setCurrentMonth();
-
-        container = getContentPane();
-        container.setLayout(new FlowLayout());
-        container.setBackground(Color.BLUE);
-        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         
         dbConnectService = new DatabaseConnectionService(SERVER_NAME, DATABASE_NAME);
-        assignmentService = new AssignmentService(dbConnectService); //TODO close this connection eventually, which can probably happen earlier than close
+        assignmentService = new AssignmentService(dbConnectService); //TODO close this connection eventually, which can probably happen earlier than window close
         
         importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME);
         sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
 
-        JButton uploadIcalButton=new JButton("Upload iCal File");
+        // Close DB connection on exit
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                dbConnectService.closeConnection();
+                System.exit(0);
+            }
+        });
+
+        //Buttons For Days
+        JButton prevMonthButton = new JButton("Prev. Month");
+        prevMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                monthView.setPreviousMonth();
+                repaint();
+            }
+        });
+        prevMonthButton.setBounds(50,100,95,30);
+        container.add(prevMonthButton);
+
+        JButton todayButton = new JButton("Today");
+        todayButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                monthView.setCurrentMonth();
+                repaint();
+            }
+        });
+        todayButton.setBounds(50,100,95,30);
+        container.add(todayButton);
+
+
+
+        JButton nextMonthButton = new JButton("Next Month");
+        nextMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                monthView.setNextMonth();
+                repaint();
+            }
+        });
+        nextMonthButton.setBounds(50,100,95,30);
+        container.add(nextMonthButton);
+
+        JButton uploadIcalButton = new JButton("Upload iCal File");
         uploadIcalButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -53,30 +98,7 @@ public class CalendarDBJava extends JFrame {
         uploadIcalButton.setBounds(50,100,95,30);
         container.add(uploadIcalButton);
 
-        JButton prevMonthButton=new JButton("Prev. Month");
-        prevMonthButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                monthView.setPreviousMonth();
-                repaint();
-            }
-        });
-        prevMonthButton.setBounds(150,100,95,30);
-        container.add(prevMonthButton);
-
-        JButton nextMonthButton=new JButton("Next Month");
-        nextMonthButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                monthView.setNextMonth();
-                repaint();
-            }
-        });
-        nextMonthButton.setBounds(250,100,95,30);
-        container.add(nextMonthButton);
-
-
-        JButton followCalendarButton =new JButton("Follow Calendar");
+        JButton followCalendarButton = new JButton("Follow Calendar");
         followCalendarButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -88,7 +110,7 @@ public class CalendarDBJava extends JFrame {
         followCalendarButton.setBounds(50,100,95,30);
         container.add(followCalendarButton);
 
-        JButton unfollowCalendarButton =new JButton("Unfollow Calendar");
+        JButton unfollowCalendarButton = new JButton("Unfollow Calendar");
         unfollowCalendarButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -100,7 +122,7 @@ public class CalendarDBJava extends JFrame {
         unfollowCalendarButton.setBounds(50,100,95,30);
         container.add(unfollowCalendarButton);
 
-        JButton listCalendarsButton =new JButton("List all Calendars");
+        JButton listCalendarsButton = new JButton("List all Calendars");
         listCalendarsButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -115,16 +137,7 @@ public class CalendarDBJava extends JFrame {
         assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername()); // TODO maybe move db connection outside paint method?
         monthView.updateAssignmentList(assignmentList);
 
-        // Close DB connection on exit
-        this.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-            	dbConnectService.closeConnection();
-            	System.exit(0);
-            }
-        });
-
-        setVisible(true);
+        setVisible(true);   // Fixes buttons not rendering.
     }
 
     @SuppressWarnings("unused")
@@ -135,6 +148,6 @@ public class CalendarDBJava extends JFrame {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        monthView.draw(g);
+        monthView.draw(g, getSize());
     }
 }

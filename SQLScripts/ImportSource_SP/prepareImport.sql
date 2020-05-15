@@ -7,7 +7,7 @@ Takes the Username of the user performing the import and a name to use for the C
 Author: Rob Budak
 -------------------------------------------
 Demo: Example with minimum parameters specified
-EXEC [prepareImport] @Username_1 ='DemoUser', @ClassName_2 = 'DemoClassImport'
+EXEC [prepareImport] @Username_1 ='DemoUser', @ClassName_2 = 'DemoClassImport2'
 --------------------------------------------------------------*/
 
 USE CalendarDB
@@ -29,21 +29,21 @@ AS
 	--Check parameters that aren't allowed to be null
 	IF @Username_1 IS NULL
 	BEGIN
-		RAISERROR('Username can not be null', 14, 1)
+		PRINT N'Username can not be null'
 		RETURN 1
 	END
 
 	IF @ClassName_2 IS NULL OR LEN(@ClassName_2) = 0
 	BEGIN
-		RAISERROR('Name can not be null or empty', 14, 1)
-		RETURN 1
+		PRINT N'Name can not be null or empty'
+		RETURN 2
 	END
 
 	-- Check to see if Username is valid
 	IF (SELECT Count(Username) from [User] WHERE Username = @Username_1) != 1
 	BEGIN
-		RAISERROR('That Username does not exist in the database', 14, 1)
-		RETURN 1
+		PRINT N'That Username does not exist in the database'
+		RETURN 3
 	END
 
 	--Actual Procedure--
@@ -60,8 +60,8 @@ AS
 		VALUES (0,					{t '12:00:00'},	@ClassName_2,	@Username_1)
 	
 	SET @NewCalendarID = SCOPE_IDENTITY()
-	PRINT 'New calendar ID is'
-	PRINT @NewCalendarID
+	--PRINT 'New calendar ID is'
+	--PRINT @NewCalendarID
 
 	--Create the new ImportSource
 	INSERT INTO [ImportSource]
@@ -69,8 +69,8 @@ AS
 		VALUES (1,		@NewCalendarID)
 
 	SET @NewImportSourceID = SCOPE_IDENTITY()
-	PRINT 'New ImportSource ID is'
-	PRINT @NewImportSourceID
+	--PRINT 'New ImportSource ID is'
+	--PRINT @NewImportSourceID
 
 	--return values of the SPROC
 	SELECT @NewCalendarID AS NewCalendarID, @NewImportSourceID AS NewImportSourceID
@@ -84,7 +84,7 @@ AS
 	IF @Status <> 0 
 	BEGIN
 		-- Return error code to the calling program to indicate failure.
-		RAISERROR('An error occurred getting the followed calendars for the user.', 14, @Status)
+		PRINT N'An error occurred getting the followed calendars for the user.'
 		RETURN @Status
 	END
 	ELSE

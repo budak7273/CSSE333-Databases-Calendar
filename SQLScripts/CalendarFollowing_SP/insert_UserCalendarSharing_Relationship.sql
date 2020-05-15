@@ -27,28 +27,28 @@ AS
 	--Check parameters that aren't allowed to be null
 	IF @Username_1 IS NULL
 	BEGIN
-		RAISERROR('Username can not be null', 14, 1)
+		PRINT N'Username can not be null'
 		RETURN 1
 	END
 
 	IF @CalendarID_2 IS NULL
 	BEGIN
-		RAISERROR('CalendarID can not be null', 14, 1)
-		RETURN 1
+		PRINT N'CalendarID can not be null'
+		RETURN 2
 	END
 
 	-- Check to see if Username is valid
 	IF (SELECT Count(Username) from [User] WHERE Username = @Username_1) != 1
 	BEGIN
-		RAISERROR('That Username does not exist in the database', 14, 1)
-		RETURN 1
+		PRINT N'That Username does not exist in the database'
+		RETURN 3
 	END
 
 	-- Check to see if Calendar ID is valid
 	IF (SELECT Count(ClassCalendarID) from [ClassCalendar] WHERE ClassCalendarID = @CalendarID_2) != 1
 	BEGIN
-		RAISERROR('That ClassCalendarID does not exist in the database', 14, 1)
-		RETURN 1
+		PRINT N'That ClassCalendarID does not exist in the database'
+		RETURN 4
 	END
 
 	--Actual Procedure--
@@ -65,7 +65,7 @@ AS
 	IF @Status <> 0 
 	BEGIN
 		-- Return error code to the calling program to indicate failure.
-		RAISERROR('An error occurred getting the followed calendars for the user.', 14, @Status)
+		PRINT N'An error occurred getting the followed calendars for the user.', 14, @Status)
 		RETURN @Status
 	END
 	ELSE

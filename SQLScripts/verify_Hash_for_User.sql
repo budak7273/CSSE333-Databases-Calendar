@@ -28,20 +28,20 @@ AS
 	--Check parameters that aren't allowed to be null
 	IF @Username_1 IS NULL
 	BEGIN
-		RAISERROR('Username can not be null', 14, 1)
+		PRINT N'Username can not be null'
 		RETURN 1
 	END
 
 	IF @PasswordHash_2 IS NULL
 	BEGIN
-		RAISERROR('PasswordHash can not be null', 14, 1)
+		PRINT N'PasswordHash can not be null'
 		RETURN 2
 	END
 
 	-- Check to see if Username is valid
 	IF (SELECT Count(Username) from [User] WHERE Username = @Username_1) != 1
 	BEGIN
-		RAISERROR('That Username does not exist in the database', 14, 1)
+		PRINT N'That Username does not exist in the database'
 		RETURN 3
 	END
 
@@ -50,7 +50,7 @@ AS
 	-- Check to see if current hash matches OldPasswordHash, error if not (which is why this isn't just part of the WHERE clause of the UPDATE)
 	IF (SELECT TOP 1 usr.[Hash] FROM [User] usr WHERE [Username] = @Username_1) <> @PasswordHash_2
 	BEGIN
-		--RAISERROR('The password did not match', 14, 1)
+		PRINT N'The password did not match'
 		RETURN 4
 	END
 
@@ -63,7 +63,7 @@ AS
 	IF @Status <> 0 
 	BEGIN
 		-- Return error code to the calling program to indicate failure.
-		RAISERROR('An error occured verifying the password for the user.', 14, @Status)
+		PRINT N'An error occured verifying the password for the user.'
 		RETURN @Status
 	END
 	ELSE

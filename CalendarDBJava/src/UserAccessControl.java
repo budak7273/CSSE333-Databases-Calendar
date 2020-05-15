@@ -6,13 +6,14 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.sql.*;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Random;
 
 public class UserAccessControl {
     // TODO: flip this to true to not have to enter login credentials (for testing)
-    private static final boolean DEBUG_LOGIN = true;
+    private static final boolean SKIP_LOGIN = false;
+    // TODO: flip this to true to always have your passwords be correct (great for resetting a lost password)
+    private static final boolean UAC_GOD_MODE = false;
 
     private static final Random RANDOM = new SecureRandom();
     private static final Base64.Encoder enc = Base64.getEncoder();
@@ -21,6 +22,7 @@ public class UserAccessControl {
 
     String username;
     String password;
+    String userRealName;
 
     public UserAccessControl(DatabaseConnectionService dbService) {
         this.dbService = dbService;
@@ -31,13 +33,11 @@ public class UserAccessControl {
     }
 
     public void startupPrompt() {
-        if (DEBUG_LOGIN) {
+        if (SKIP_LOGIN) {
             username = "DemoUser";
             password = "DemoPass";
             return;
         }
-
-        // TODO: register OR login question prompt
 
         int selection = JOptionPane.showOptionDialog(null,
                 "Welcome to CalendarDB,\nthe leader in half-baked calendar technology.\nPlease Login or Register.",
@@ -57,7 +57,7 @@ public class UserAccessControl {
 
     public void loginPrompt() {
 
-        if(DEBUG_LOGIN) {
+        if(SKIP_LOGIN) {
             username = "DemoUser";
             password = "DemoPass";
         } else {
@@ -65,7 +65,7 @@ public class UserAccessControl {
             password = JOptionPane.showInputDialog("Enter your password.");
         }
 
-        while (!validateLogin()) {
+        while (!validatePassword()) {
             JOptionPane.showMessageDialog(null, "Sorry, that username or password is incorrect.\nPlease try again.");
 
             username = JOptionPane.showInputDialog("Enter your username.");
@@ -77,6 +77,7 @@ public class UserAccessControl {
     public void registrationPrompt() {
         username = JOptionPane.showInputDialog("Please enter a new username.");
         password = JOptionPane.showInputDialog("Please enter a password.");
+        userRealName = JOptionPane.showInputDialog("Please enter your real name.");
 
         while (!registerUser()) {
             JOptionPane.showMessageDialog(null, "Sorry, that username or password is invalid.\nPlease try a new one.");
@@ -85,54 +86,99 @@ public class UserAccessControl {
             password = JOptionPane.showInputDialog("Please enter a password.");
         }
     }
+    
+    public void resetPasswordPrompt() {
+        password = JOptionPane.showInputDialog("Please enter your current password.");
+        if (validatePassword()) {
+            String newPassword = JOptionPane.showInputDialog("Please enter a new password.");
 
-    public void logout() {
-        // TODO
+            if (resetPassword(newPassword)) {
+                JOptionPane.showMessageDialog(null, "Success! Your password was successfully changed.");
+            } else {
+                JOptionPane.showMessageDialog(null, "Password Change Failed. Please try again later.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Sorry, that password is incorrect.");
+        }
+    }
+
+    /**
+     * Resets the current user's password if the currently stored password is correct.
+     * @return true if successful, false otherwise.
+     */
+    private boolean resetPassword(String newPassword) {
+        byte[] salt = getStoredSalt();
+        validatePassword(salt);
+        
+        // Hash user supplied password with Salt from DB.
+        if (salt == null) {
+            System.out.println("ERROR: salt is null");
+            return false;
+        }
+        String oldHash = hashPassword(salt, password);
+        String newHash = hashPassword(salt, newPassword);
+
+        if (UAC_GOD_MODE) {
+            oldHash = JOptionPane.showInputDialog("GOD MODE: Please enter Old Hash");
+        }
+
+        System.out.printf("Changing %s's password hash from %s to %s", username, oldHash, newHash);
+        
+        CallableStatement updatePasswordCS = null;
+        try {
+            // Build Password Change Request
+            dbService.connect();
+            updatePasswordCS = dbService.getConnection().prepareCall("{? = CALL update_User_Password(?, ?, ?)}");
+            updatePasswordCS.registerOutParameter(1, Types.INTEGER);
+            updatePasswordCS.setString(2, username);
+            updatePasswordCS.setString(3, oldHash);
+            updatePasswordCS.setString(4, newHash);
+
+            // Execute Password Change Request
+            updatePasswordCS.execute();
+            int pwChangeStatus = updatePasswordCS.getInt(1);
+            updatePasswordCS.close();
+
+            // Check return status (was current password valid?)
+            if (pwChangeStatus != 0) {
+                System.out.printf("ERROR: pwChangeStatus = %d\n", pwChangeStatus);
+            }
+            return pwChangeStatus == 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (updatePasswordCS != null) {
+                    updatePasswordCS.close();
+                }
+            } catch (SQLException ignored) {}
+        }
+        return false;
+    }
+
+    private boolean validatePassword() {
+        byte[] salt = getStoredSalt();
+        return validatePassword(salt);
     }
 
     /**
      * Attempts to log an existing user in using the stored username/password.
      * @return true if the user successfully logged in, false otherwise.
      */
-    private boolean validateLogin() {
-        CallableStatement saltCS = null;
+    private boolean validatePassword(byte[] salt) {
+        if (UAC_GOD_MODE) return true;
+        // Hash user supplied password with Salt from DB.
+        if (salt == null) {
+            System.out.println("ERROR: salt is null");
+            return false;
+        }
+        String userHash = hashPassword(salt, password);
+//        System.out.printf("userhash = %s\n", userHash);
+
         CallableStatement verifyHashCS = null;
         try {
-            // Get Salt for Username
-            dbService.connect();
-            saltCS = dbService.getConnection().prepareCall("{? = CALL get_Salt_for_User(?)}");
-            saltCS.registerOutParameter(1, Types.INTEGER);
-            saltCS.setString(2, username);
-
-            // Execute Query to get Salt
-            ResultSet saltRS = saltCS.executeQuery();
-            int saltStatus = saltCS.getInt(1);
-            saltCS.close();
-            
-            if (saltStatus != 0) {
-                System.out.printf("ERROR: saltStatus = %d", saltStatus);
-            }
-
-            // Check if user exists (result set is empty if no user)
-            if (!saltRS.next()) {
-                System.out.println("ERROR: saltRS is empty");
-                return false;
-            }
-
-            // Parse Salt from DB
-            String saltString = saltRS.getString("Salt");
-            if (saltString == null) {
-                System.out.println("ERROR: saltRS is null");
-                return false;
-            }
-
-            System.out.printf("DB returned \"%s\" for saltString of user %s\n", saltString, username);
-            byte[] salt = getBytesFromString(saltString);
-
-            // Hash user supplied password with Salt from DB.
-            String userHash = hashPassword(salt, password);
-
             // Send userHash to DB to verify.
+            dbService.connect();
             verifyHashCS = dbService.getConnection().prepareCall("{? = CALL verify_Hash_for_User(?, ?)}");
             verifyHashCS.registerOutParameter(1, Types.INTEGER);
             verifyHashCS.setString(2, username);
@@ -140,19 +186,18 @@ public class UserAccessControl {
 
             // Execute Query to get Salt
             verifyHashCS.execute();
-            int returnedStatus = verifyHashCS.getInt(1);
+            int hashStatus = verifyHashCS.getInt(1);
             verifyHashCS.close();
 
             // Check status (was password valid?)
-            return returnedStatus == 0;
+            if (hashStatus != 0) {
+                System.out.printf("ERROR: hashStatus = %d\n", hashStatus);
+            }
+            return hashStatus == 0;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             try {
-                if (saltCS != null) {
-                    saltCS.close();
-                }
-
                 if (verifyHashCS != null) {
                     verifyHashCS.close();
                 }
@@ -166,42 +211,35 @@ public class UserAccessControl {
      * @return true if the user was successfully registered, false otherwise.
      */
     private boolean registerUser() {
+        // Generate new salt
         byte[] newSalt = getNewSalt();
-        System.out.println(Arrays.toString(newSalt));
-        String pwHash = hashPassword(newSalt, password);
+        String newSaltString = getStringFromBytes(newSalt);
 
-        System.out.println("gen salt bytes: "+Arrays.toString(newSalt));
-        System.out.println("sent salt string: "+getStringFromBytes(newSalt));
-        System.out.println("hash string: " + pwHash);
+        // Hash new password
+        String newHash = hashPassword(newSalt, password);
 
-        int status;
+//        System.out.println("gen salt bytes: "+Arrays.toString(newSalt));
+//        System.out.println("sent salt string: "+getStringFromBytes(newSalt));
+//        System.out.println("hash string: " + userHash);
+
         CallableStatement registerCS = null;
         try {
-            registerCS = dbService.getConnection().prepareCall("{? = CALL REGISTER(?,?,?)}");
+            // Call register_User SP
+            dbService.connect();
+            registerCS = dbService.getConnection().prepareCall("{? = CALL register_User(?, ?, ?, ?)}");
             registerCS.registerOutParameter(1, Types.INTEGER);
             registerCS.setString(2, username);
-            registerCS.setString(3, getStringFromBytes(newSalt));
-            registerCS.setString(4, pwHash);
+            registerCS.setString(3, userRealName);
+            registerCS.setString(4, newSaltString);
+            registerCS.setString(5, newHash);
+
+            // Execute register_user Query
             registerCS.execute();
-            status = registerCS.getInt(1);
-//			System.out.printf("Returned Status = %d\n", status);
-            switch (status) {
-                case 0:
-                    return true;
-                case 1:
-                    //Username is empty/null.
-                    return false;
-                case 2:
-                    //PWSalt is empty/null.
-                    return false;
-                case 3:
-                    //PasswordHash is empty/null.
-                    return false;
-                case 4:
-                    //Username already exists.
-                    return false;
-            }
-//			return status == 0;
+            int returnedStatus = registerCS.getInt(1);
+            registerCS.close();
+
+            // Check status
+            return returnedStatus == 0;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -214,6 +252,59 @@ public class UserAccessControl {
         return false;
     }
 
+    /**
+     * Gets the salt currently stored in the database for the current user.
+     * @return the stored salt, or null if error (user probably doesnt exist).
+     */
+    public byte[] getStoredSalt() {
+        byte[] salt = null;
+        CallableStatement saltCS = null;
+        try {
+            // Get Salt for Username
+            dbService.connect();
+            saltCS = dbService.getConnection().prepareCall("{CALL get_Salt_for_User(?)}");
+            saltCS.setString(1, username);
+
+            // Execute Query to get Salt
+            ResultSet saltRS = saltCS.executeQuery();
+
+            // Check if user exists (result set is empty if no user)
+            if (saltRS.isClosed()) {
+                System.out.println("ERROR: saltRS is closed.");
+                return null;
+            }
+            if (!saltRS.next()) {
+                System.out.println("ERROR: saltRS is empty");
+                return null;
+            }
+
+            // Parse Salt from DB
+            String saltString = saltRS.getString("Salt");
+            saltCS.close();
+
+            if (saltString == null) {
+                System.out.println("ERROR: saltRS is null");
+                return null;
+            }
+
+            System.out.printf("DB returned \"%s\" for saltString of user %s\n", saltString, username);
+            salt = getBytesFromString(saltString);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (saltCS != null) {
+                    saltCS.close();
+                }
+            } catch (SQLException ignored) {}
+        }
+        return salt;
+    }
+
+    /**
+     * Securely generates a new password salt.
+     * @return the new password salt
+     */
     public byte[] getNewSalt() {
         byte[] salt = new byte[16];
         RANDOM.nextBytes(salt);
@@ -241,6 +332,7 @@ public class UserAccessControl {
     public String getStringFromBytes(byte[] data) {
         return enc.encodeToString(data);
     }
+    
     public byte[] getBytesFromString(String data) {
         return dec.decode(data);
     }

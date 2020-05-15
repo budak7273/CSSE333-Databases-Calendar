@@ -84,6 +84,16 @@ public class CalendarDBJava extends JFrame {
         nextMonthButton.setBounds(50,100,95,30);
         container.add(nextMonthButton);
 
+        JButton resetPasswordButton = new JButton("Reset Password");
+        resetPasswordButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                userAccessControl.resetPasswordPrompt();
+            }
+        });
+        resetPasswordButton.setBounds(50,100,95,30);
+        container.add(resetPasswordButton);
+
         JButton uploadIcalButton = new JButton("Upload iCal File");
         uploadIcalButton.addActionListener(new ActionListener(){
             @Override

@@ -27,8 +27,11 @@ public class MonthView {
     private int year;
     private int month;
 
-    public MonthView(ArrayList<Assignment> assignmentList) {
+    public void updateAssignmentList(ArrayList<Assignment> assignmentList) {
         this.assignmentList = assignmentList;
+    }
+
+    public MonthView() {
     }
 
     /**
@@ -36,7 +39,7 @@ public class MonthView {
      */
     public void setCurrentMonth() {
         Date currentDate = new Date();
-        setMonth(currentDate.getYear(), currentDate.getMonth());
+        setMonth(currentDate.getYear() + 1900, currentDate.getMonth());
     }
 
     /**
@@ -73,6 +76,8 @@ public class MonthView {
      */
     public void draw(Graphics g) {
         this.g = g;
+
+        System.out.printf("Drawing month %d, year %d\n", month, year);
 
         g.setColor(monthViewBorderColor);
         g.fillRect(leftMargin, topMargin, monthWidth, monthHeight);

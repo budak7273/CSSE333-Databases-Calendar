@@ -2,7 +2,7 @@ import javax.swing.*;
 
 public class UserAccessControl {
     // TODO: flip this to true to not have to enter login credentials (for testing)
-    private static final boolean DEBUG_LOGIN = false;
+    private static final boolean DEBUG_LOGIN = true;
 
     String username;
     String password;

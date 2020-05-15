@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class CalendarDBJava extends JFrame {
     private static final int WINDOW_WIDTH = 1450;
@@ -13,7 +12,7 @@ public class CalendarDBJava extends JFrame {
     private DatabaseConnectionService dbConnectService;
     private Container container;
 
-    private MonthView monthView;
+    private MonthView monthView = new MonthView();
     private UserAccessControl userAccessControl = new UserAccessControl();
 
     private ImportHandler importHandler;
@@ -28,6 +27,7 @@ public class CalendarDBJava extends JFrame {
         super("CalendarDB UI");
 
         userAccessControl.loginPrompt();
+        monthView.setCurrentMonth();
 
         container = getContentPane();
         container.setLayout(new FlowLayout());
@@ -38,7 +38,7 @@ public class CalendarDBJava extends JFrame {
         assignmentService = new AssignmentService(dbConnectService); //TODO close this connection eventually, which can probably happen earlier than close
         
         importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME);
-        sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, username);
+        sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
 
         JButton uploadIcalButton=new JButton("Upload iCal File");
         uploadIcalButton.addActionListener(new ActionListener(){
@@ -46,7 +46,7 @@ public class CalendarDBJava extends JFrame {
             public void actionPerformed(ActionEvent e){
                 importHandler.promptICalImport();
                 assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername()); // TODO maybe move db connection outside paint method?
-                monthView = new MonthView(assignmentList);
+                monthView.updateAssignmentList(assignmentList);
                 paint(container.getGraphics());
             }
         });
@@ -81,7 +81,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.followCalendar();
-                redraw();
+                repaint();
             }
 
         });
@@ -93,7 +93,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.unfollowCalendar();
-                redraw();
+                repaint();
             }
 
         });
@@ -105,7 +105,7 @@ public class CalendarDBJava extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.listAllCalendars();
-                redraw();
+                repaint();
             }
 
         });
@@ -113,7 +113,7 @@ public class CalendarDBJava extends JFrame {
         container.add(listCalendarsButton);
 
         assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername()); // TODO maybe move db connection outside paint method?
-        monthView = new MonthView(assignmentList);
+        monthView.updateAssignmentList(assignmentList);
 
         // Close DB connection on exit
         this.addWindowListener(new java.awt.event.WindowAdapter() {

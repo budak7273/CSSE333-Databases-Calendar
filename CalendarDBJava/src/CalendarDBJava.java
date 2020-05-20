@@ -35,7 +35,9 @@ public class CalendarDBJava extends JFrame {
         assignmentService = new AssignmentService(dbConnectService);
         userAccessControl = new UserAccessControl(dbConnectService);
 
-        userAccessControl.startupPrompt();
+        if (!userAccessControl.startupPrompt()) {   // User cancelled login/register screen
+            System.exit(0);
+        }
         monthView.setCurrentMonth();
         
         importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());

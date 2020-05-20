@@ -1,6 +1,7 @@
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -32,11 +33,16 @@ public class UserAccessControl {
         return username;
     }
 
-    public void startupPrompt() {
+    /**
+     * Allows user to login or register.
+     * @return true if logged in (or registered (and was logged in automatically)) successfully, or false if the
+     * register/login prompt's cancel button was pressed.
+     */
+    public boolean startupPrompt() {
         if (SKIP_LOGIN) {
             username = "DemoUser";
             password = "DemoPass";
-            return;
+            return true;
         }
 
         int selection = JOptionPane.showOptionDialog(null,
@@ -45,62 +51,130 @@ public class UserAccessControl {
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                new String[] {"Login", "Register"},
+                new String[] {"Login", "Register", "Close"},
                 "Register");
 
-        if (selection == 0) {   // Login
-            loginPrompt();
-        } else {
-            registrationPrompt();
+
+
+        if (selection == 2) {   // Close Button
+            return false;
+        } else if (selection == 0) {   // Login
+            if(!loginPrompt()) {        // Cancelled login, so show startup.
+                return startupPrompt();
+            }
+            return true;
+        } else {    // Register
+            if(!registrationPrompt()) { // Cancelled register, so show startup.
+                return startupPrompt();
+            }
+            return true;
         }
     }
 
-    public void loginPrompt() {
+    /**
+     * Logs in the user via displayed prompts.
+     * @return true if login successful, false if a cancel button was pressed.
+     */
+    public boolean loginPrompt() {
 
         if(SKIP_LOGIN) {
             username = "DemoUser";
             password = "DemoPass";
         } else {
             username = JOptionPane.showInputDialog("Enter your username.");
+            if (username == null) return false; // User Cancelled
+
             password = JOptionPane.showInputDialog("Enter your password.");
+            if (password == null) return false;
         }
 
         while (!validatePassword()) {
             JOptionPane.showMessageDialog(null, "Sorry, that username or password is incorrect.\nPlease try again.");
 
             username = JOptionPane.showInputDialog("Enter your username.");
-            password = JOptionPane.showInputDialog("Enter your password.");
-        }
+            if (username == null) return false;
 
+            password = JOptionPane.showInputDialog("Enter your password.");
+            if (password == null) return false;
+        }
+        return true; // Valid Login
     }
 
-    public void registrationPrompt() {
+    /**
+     * Registers a new user via displayed prompts.
+     * @return true if registration successful, false if a cancel button was pressed.
+     */
+    public boolean registrationPrompt() {
         username = JOptionPane.showInputDialog("Please enter a new username.");
-        password = JOptionPane.showInputDialog("Please enter a password.");
+        if (username == null) return false;
+
+        password = doublePasswordPrompt("Please enter a password for your new account.");
+        if (password == null) return false;
+
         userRealName = JOptionPane.showInputDialog("Please enter your real name.");
+        if (userRealName == null) return false;  // User Cancelled.
 
         while (!registerUser()) {
             JOptionPane.showMessageDialog(null, "Sorry, that username or password is invalid.\nPlease try a new one.");
 
             username = JOptionPane.showInputDialog("Please enter a new username.");
-            password = JOptionPane.showInputDialog("Please enter a password.");
+            if (username == null) return false;
+            password = doublePasswordPrompt("Please enter a password for your new account.");
+            if (password == null) return false;
         }
+        return true;    // Registration Successful
     }
-    
-    public void resetPasswordPrompt() {
+
+    /**
+     * Resets a user's password via displayed prompts.
+     * @return true if reset successful, false if a cancel button was pressed.
+     */
+    public boolean resetPasswordPrompt() {
         password = JOptionPane.showInputDialog("Please enter your current password.");
+        if (password == null) return false;  // User cancelled
+
         if (validatePassword()) {
-            String newPassword = JOptionPane.showInputDialog("Please enter a new password.");
+            String newPassword = doublePasswordPrompt("Please enter a new password.");
+            if (newPassword == null) {  // User cancelled
+                JOptionPane.showMessageDialog(null, "Password Change Failed. Please try again later.");
+                return false;
+            }
 
             if (resetPassword(newPassword)) {
                 JOptionPane.showMessageDialog(null, "Success! Your password was successfully changed.");
+                return true;
             } else {
                 JOptionPane.showMessageDialog(null, "Password Change Failed. Please try again later.");
+                return false;
             }
         } else {
             JOptionPane.showMessageDialog(null, "Sorry, that password is incorrect.");
+            return false;
         }
     }
+
+    /**
+     * Prompts the user to enter a new password twice.
+     * @param promptMessage the message to display on the prompt.
+     * @return entered string, or null if the user selected cancel on any prompt.
+     */
+    private String doublePasswordPrompt(String promptMessage) {
+        String pw1, pw2;
+        do {
+            pw1 = JOptionPane.showInputDialog(promptMessage);
+            if (pw1 == null) return null;
+            pw2 = JOptionPane.showInputDialog(promptMessage + " (Again)");
+            if (pw2 == null) return null;
+
+            if (pw1.equals(pw2)) {
+                return pw1;
+            } else {
+                JOptionPane.showMessageDialog(null, "Passwords did not match. Please try again.");
+            }
+
+        } while (true);
+    }
+
 
     /**
      * Resets the current user's password if the currently stored password is correct.
@@ -125,7 +199,7 @@ public class UserAccessControl {
         CallableStatement updatePasswordCS = null;
         try {
             // Build Password Change Request
-            System.out.printf("Password (Hash) Change Request for User %s from %s to %s...", username, oldHash, newHash);
+            System.out.printf("Password (Hash) Change Request for User \"%s\" from \"%s\" to \"%s\"...", username, oldHash, newHash);
             dbService.connect();
             updatePasswordCS = dbService.getConnection().prepareCall("{? = CALL update_User_Password(?, ?, ?)}");
             updatePasswordCS.registerOutParameter(1, Types.INTEGER);
@@ -177,7 +251,7 @@ public class UserAccessControl {
         CallableStatement verifyHashCS = null;
         try {
             // Send userHash to DB to verify.
-            System.out.printf("Validating Password Hash for user %s, hash %s...", username, userHash);
+            System.out.printf("Validating Password Hash for user \"%s\", hash \"%s\"...", username, userHash);
             dbService.connect();
             verifyHashCS = dbService.getConnection().prepareCall("{? = CALL verify_Hash_for_User(?, ?)}");
             verifyHashCS.registerOutParameter(1, Types.INTEGER);
@@ -225,7 +299,7 @@ public class UserAccessControl {
         CallableStatement registerCS = null;
         try {
             // Call register_User SP
-            System.out.printf("Registering New User %s, with username %s with salt \"%s\", hash \"%s\"...", userRealName, username, newSaltString, newHash);
+            System.out.printf("Registering New User \"%s\", with username \"%s\" with salt \"%s\", hash \"%s\"...", userRealName, username, newSaltString, newHash);
             dbService.connect();
             registerCS = dbService.getConnection().prepareCall("{? = CALL register_User(?, ?, ?, ?)}");
             registerCS.registerOutParameter(1, Types.INTEGER);

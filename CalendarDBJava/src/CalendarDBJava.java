@@ -156,10 +156,10 @@ public class CalendarDBJava extends JFrame {
         container.add(listCalendarsButton);
         
         JButton exportButton = new JButton("Export Events");
-        listCalendarsButton.addActionListener(new ActionListener(){
+        exportButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                //CONTENT HERE LATER
+                ExportHandler.convertAssignmentsToICal(assignmentList);
             }
 
         });

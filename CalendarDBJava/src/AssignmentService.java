@@ -37,8 +37,9 @@ public class AssignmentService {
                 int ParentClassCalendarID = rs.getInt("ParentClassCalendarID");
                 int ParentClassSectionID = rs.getInt("ParentClassSectionID");
                 int ImportSourceID = rs.getInt("ImportSourceID");
+                String EventDescription = rs.getString("EventDescription");
 
-                Assignment thisAssignment = new Assignment(AssignmentID, EventName, EventDate, EventProgress, Type, EventSpecificColor, ParentClassCalendarID, ParentClassSectionID, ImportSourceID);
+                Assignment thisAssignment = new Assignment(AssignmentID, EventName, EventDate, EventProgress, Type, EventSpecificColor, ParentClassCalendarID, ParentClassSectionID, ImportSourceID, EventDescription);
                 assignments.add(thisAssignment);
             }
             System.out.printf("\tDatabase Returned %d Assignments for user %s.\n", assignments.size(), username);

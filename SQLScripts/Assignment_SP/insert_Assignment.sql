@@ -33,9 +33,13 @@ CREATE PROCEDURE [insert_Assignment]
  @ImportSourceID_8			[int] = null,
  @EventDescription_9		[varchar](257) = null)
 AS
-	-- Supress row count messages
+	-- Suppress row count messages
 	SET NOCOUNT ON
-	PRINT 'DEBUG start'
+
+	-- For debugging datetime recieved
+	/*DECLARE @a nvarchar(20) = CAST(@EventDate_2 AS VARCHAR(20))
+	RAISERROR('Date on import is %s', 18, 1, @a)
+	*/
 
 	--Check parameters that aren't allowed to be null
 	IF @EventDate_2 IS NULL
@@ -82,8 +86,6 @@ AS
 		PRINT N'EventProgress outside of bounds: 0 to 100 inclusive'
 		RETURN 1
 	END
-
-	--TODO verify valid color? or trust valid
 
 	--Actual Procedure--
 

@@ -45,7 +45,7 @@ public class UpcomingEventsView extends View {
     private Graphics g;
     private int assignmentDisplayLimit = 3;
 
-    private Date filterStartDate = new Date();
+    private Date filterStartDate = new Date(new SimpleDateFormat("MMMM d, YYYY").format(new Date()));
     private Date filterEndDate = new Date(3000, 1, 1);  // Queue Jonas Brothers...
     private String filterEventName = "";
     private String filterEventType = "";

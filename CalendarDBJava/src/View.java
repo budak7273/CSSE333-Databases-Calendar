@@ -40,7 +40,7 @@ public abstract class View {
                         "(ID# %d )\n" +
                         "Due: %s\n" +
                         "Type: %s\n" +
-                        "Class Section ID: %d\n" +
+                        "Class Calendar ID: %d\n" +
                         "Description:\n%s", assignment.getEventName(), assignment.getEventProgress(), assignment.getAssignmentID(),
                 assignment.getEventDate().toLocaleString(), assignment.getEventType() == null ? "" : assignment.getEventType(),
                 assignment.getParentClassCalendarID(), assignment.getEventDescription());
@@ -57,12 +57,12 @@ public abstract class View {
             case 0:
                 return;
             case 1:
-                // TODO: update Event
+                calendarDBJava.getAssignmentService().updateAssignmentPrompt(assignment);
+                calendarDBJava.updateAndRedrawAssignments();
                 break;
             case 2:
                 calendarDBJava.getAssignmentService().deleteAssignmentFromDB(assignment.getAssignmentID());
-                    calendarDBJava.updateAndRedrawAssignments();
-
+                calendarDBJava.updateAndRedrawAssignments();
                 break;
         }
     }

@@ -169,8 +169,8 @@ public class ClassSectionService {
             System.out.printf("delete_Class_Section returned status %d\n", returnedStatus);
             if (returnedStatus != 0) return false;
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ignored) {
+//            e.printStackTrace();
             return false;
         } finally {
             try {
@@ -279,6 +279,7 @@ public class ClassSectionService {
 //            else selection--;
         }
 
+        if (selection == null) return -1;
         return selection.ClassSectionID;
     }
 

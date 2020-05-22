@@ -107,7 +107,7 @@ public class AssignmentService {
         newEventType = JOptionPane.showInputDialog("Enter Assignment Type (Test, Quiz, etc.): ", assignmentToUpdate.getEventType());
         if (newEventType == null) return false;
 
-        HashMap<String, Integer> mapping = calendarSharingHandler.getFriendlyStringIDMapping(calendarSharingHandler.listAllFollowedCalendars(false));   // TODO: Set Default Value to currently stored calendar
+        HashMap<String, Integer> mapping = calendarSharingHandler.getFriendlyStringIDMapping(calendarSharingHandler.listAllFollowedCalendars(false));
         String[] options = mapping.keySet().toArray(new String[0]);
         String desiredIDWithSpace = "" + assignmentToUpdate.getParentClassCalendarID() + " ";
         int i;
@@ -130,7 +130,7 @@ public class AssignmentService {
             return false;
         }
 
-        newEventSpecificColor = JColorChooser.showDialog(null, "Choose an Event Color", new Color(assignmentToUpdate.getEventSpecificColor())).getRGB();    // TODO: Use calendar color as default
+        newEventSpecificColor = JColorChooser.showDialog(null, "Choose an Event Color", new Color(assignmentToUpdate.getEventSpecificColor())).getRGB();
 
         NewEventDescription = JOptionPane.showInputDialog("Enter Assignment Description", assignmentToUpdate.getEventDescription());
         if (NewEventDescription == null) return false;

@@ -1,4 +1,4 @@
--- =============================================
+W-- =============================================
 -- Author:		Thomas Nandola
 -- Create date: May 6th, 2020
 -- Description:	Procedure to Delete from the ClassSection Table.

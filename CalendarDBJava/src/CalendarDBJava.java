@@ -217,7 +217,11 @@ public class CalendarDBJava extends JFrame {
         newClassSectionButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                classSectionService.newClassSectionPrompt();
+                if (classSectionService.newClassSectionPrompt()) {
+                    JOptionPane.showMessageDialog(null, "Class Section Successfully Added.");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Class Section Creation Failed.\nPlease try again.");
+                }
             }
         });
         newClassSectionButton.setBounds(50,100,95,30);
@@ -226,8 +230,12 @@ public class CalendarDBJava extends JFrame {
         JButton deleteClassSectionButton = new JButton("Delete Class Section");
         deleteClassSectionButton.addActionListener(new ActionListener(){
             @Override
-            public void actionPerformed(ActionEvent e){
-                classSectionService.deleteClassSectionPrompt();
+            public void actionPerformed(ActionEvent e) {
+                if (classSectionService.deleteClassSectionPrompt()) {
+                    JOptionPane.showMessageDialog(null, "Class Section Successfully Deleted.");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Class Section Deletion Failed.\nThe Section Likely Still has users attached.");    // TODO: fix this by just setting all still referencing it to null
+                }
             }
         });
         deleteClassSectionButton.setBounds(50,100,95,30);

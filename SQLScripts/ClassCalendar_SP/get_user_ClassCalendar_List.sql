@@ -41,7 +41,7 @@ AS
 
 	SELECT DISTINCT ccal.ClassCalendarID as [CalendarID], ccal.ClassName as [Name], ccal.ParentUserID as [Creator]
 	FROM [ClassCalendar] ccal
-		INNER JOIN [UserCalendarSharing] ucalShare
+		LEFT JOIN [UserCalendarSharing] ucalShare
 		ON ccal.ClassCalendarID = ucalShare.ClassCalendarID
 	WHERE ccal.ParentUserID = @Username_1 OR ucalShare.Username = @Username_1
 	ORDER BY ccal.ClassCalendarID

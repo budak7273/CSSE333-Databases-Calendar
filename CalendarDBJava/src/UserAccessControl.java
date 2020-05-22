@@ -58,6 +58,7 @@ public class UserAccessControl {
 
 
         if (selection == 2) {   // Close Button
+            System.exit(0); // User cancelled login/register screen, so exit application
             return false;
         } else if (selection == 0) {   // Login
             if(!loginPrompt()) {        // Cancelled login, so show startup.

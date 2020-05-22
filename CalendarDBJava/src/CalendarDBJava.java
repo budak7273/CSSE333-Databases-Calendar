@@ -5,23 +5,30 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class CalendarDBJava extends JFrame {
-    private static final int WINDOW_WIDTH = 1450;
-    private static final int WINDOW_HEIGHT = 872;
+    private static final int WINDOW_WIDTH = 1700;
+    private static final int WINDOW_HEIGHT = 1100;
 
     private AssignmentService assignmentService;
     private DatabaseConnectionService dbConnectService;
     private Container container;
 
     private MonthView monthView = new MonthView();
+    private UpcomingEventsView upcomingEventsView = new UpcomingEventsView();
     private UserAccessControl userAccessControl;
 
     private ImportHandler importHandler;
     private CalendarSharingHandler sharingHandler;
 
-    private ArrayList<Assignment> assignmentList;
-
     private static final String SERVER_NAME = "golem.csse.rose-hulman.edu";
     private static final String DATABASE_NAME = "CalendarDB";
+
+    private enum View {
+        MONTH_VIEW,
+        UPCOMING_EVENTS_VIEW
+    }
+
+    private View currentView = View.MONTH_VIEW;
+
 
     public CalendarDBJava() {
         // Setting Swing and JFrame related properties.
@@ -30,9 +37,12 @@ public class CalendarDBJava extends JFrame {
         container.setLayout(new FlowLayout());
         container.setBackground(monthView.getMonthViewBackgroundColor());
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        
+
+        // Initializing various services
         dbConnectService = new DatabaseConnectionService(SERVER_NAME, DATABASE_NAME);
+
         userAccessControl = new UserAccessControl(dbConnectService);
+        userAccessControl.startupPrompt();
 
         if (!userAccessControl.startupPrompt()) {   // User cancelled login/register screen
             System.exit(0);
@@ -53,7 +63,37 @@ public class CalendarDBJava extends JFrame {
             }
         });
 
-        //Buttons For Days
+        addAllButtons();
+
+        updateAndRedrawAssignments();
+        setVisible(true);   // Fixes buttons not rendering.
+    }
+
+    @SuppressWarnings("unused")
+	public static void main(String[] args) {
+        CalendarDBJava application = new CalendarDBJava();
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        switch (currentView) {
+            case MONTH_VIEW:
+                monthView.draw(g, getSize());
+                break;
+            case UPCOMING_EVENTS_VIEW:
+                upcomingEventsView.draw(g, getSize());
+        }
+    }
+    
+    private void updateAndRedrawAssignments() {
+        ArrayList<Assignment> assignmentList = assignmentService.getAllAssignments();
+        monthView.updateAssignmentList(assignmentList);
+        upcomingEventsView.updateAssignmentList(assignmentList);
+        repaint();
+    }
+
+    private void addAllButtons() {
         JButton prevMonthButton = new JButton("Prev. Month");
         prevMonthButton.addActionListener(new ActionListener(){
             @Override
@@ -143,9 +183,9 @@ public class CalendarDBJava extends JFrame {
         });
         listFollowedCalendarsButton.setBounds(50,100,95,30);
         container.add(listFollowedCalendarsButton);
-        
+
         /*JButton listCalendarsButton = new JButton("List all Calendars");
-        listCalendarsButton.addActionListener(new ActionListener(){
+		listCalendarsButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
                 sharingHandler.getListAllCalendarsOverall(true);
@@ -155,12 +195,12 @@ public class CalendarDBJava extends JFrame {
         });
         listCalendarsButton.setBounds(50,100,95,30);
         container.add(listCalendarsButton);*/
-        
+
         JButton exportButton = new JButton("Export Events");
         exportButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                ExportHandler.convertAssignmentsToICal(assignmentList);
+                ExportHandler.convertAssignmentsToICal(assignmentService.getAllAssignments());
             }
 
         });
@@ -171,7 +211,6 @@ public class CalendarDBJava extends JFrame {
         createNewAssignmentButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                System.out.println("Pressed");
                 if (assignmentService.createNewAssignmentPrompt()) {
                     updateAndRedrawAssignments();
                 }
@@ -179,25 +218,5 @@ public class CalendarDBJava extends JFrame {
         });
         createNewAssignmentButton.setBounds(50,100,95,30);
         container.add(createNewAssignmentButton);
-
-        updateAndRedrawAssignments();
-        setVisible(true);   // Fixes buttons not rendering.
-    }
-
-    @SuppressWarnings("unused")
-	public static void main(String[] args) {
-        CalendarDBJava application = new CalendarDBJava();
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        monthView.draw(g, getSize());
-    }
-    
-    private void updateAndRedrawAssignments() {
-    	assignmentList = assignmentService.getAllAssignments();
-        monthView.updateAssignmentList(assignmentList);
-        repaint();
     }
 }

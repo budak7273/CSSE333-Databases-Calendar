@@ -1,13 +1,12 @@
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 public class MonthView {
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
+    private Font monthTileFont = new Font("Helvetica", Font.PLAIN, 30);
     private Color dayColor = Color.DARK_GRAY;
     private Color monthViewBorderColor = Color.BLACK;
     private Color monthViewBackgroundColor = new Color(0x800000);
@@ -16,7 +15,7 @@ public class MonthView {
     private int monthHeight = 800;
     private int leftMargin = 25;
     private int rightMargin = 25;
-    private int topMargin = 40 + 22;     // + 22 accounts for Window Bar.
+    private int topMargin = 40 + 22 + monthTileFont.getSize()  + 10;     // + 22 accounts for Window Bar, + mFT.gS accounts for month title
     private int bottomMargin = 25;
     private int horizontalDaySeparation = 5;
     private int verticalDaySeparation = 5;
@@ -103,8 +102,16 @@ public class MonthView {
 
         System.out.printf("Drawing month %d, year %d\n", month, year);
 
+        // Month background
         g.setColor(monthViewBorderColor);
         g.fillRect(leftMargin, topMargin, monthWidth, monthHeight);
+
+        // Month Title
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, month, 1);
+        g.setColor(Color.WHITE);
+        g.setFont(monthTileFont);
+        g.drawString(new SimpleDateFormat("MMMM YYYY").format(cal.getTime()), leftMargin + 5, topMargin - 10);
 
         int dayOfMonth = 1;
         int j = firstDayOfMonth - 1;

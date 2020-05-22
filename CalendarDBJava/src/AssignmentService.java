@@ -66,7 +66,6 @@ public class AssignmentService {
         return assignments;
     }
 
-
     /**
      * prompts the user to create a new assignment, then adds it to the database.
      * Does not update assignment list or redraw calendar, so maybe do that after calling this?
@@ -153,9 +152,9 @@ public class AssignmentService {
             insertAssignmentsPS.setString(i++, eventType);
             insertAssignmentsPS.setInt(i++, eventSpecificColor);
             insertAssignmentsPS.setInt(i++, parentClassCalendarID);
+            insertAssignmentsPS.setInt(i++, -1); // -1 indicates no (null) class section id (class section is only for downstream duplication)
             insertAssignmentsPS.setString(i++, null);
-            insertAssignmentsPS.setString(i++, null);
-            insertAssignmentsPS.setString(i++, eventDescription); //TODO add description to Assignment Class
+            insertAssignmentsPS.setString(i++, eventDescription);
 
             insertAssignmentsPS.execute();
 
@@ -176,6 +175,12 @@ public class AssignmentService {
             }
         }
         return returnedStatus == 0;
+    }
+
+    public ArrayList<Assignment> getAllAssignmentsSortedByDate() {
+        ArrayList<Assignment> assignmentList = getAllAssignments();
+        getAllAssignments().sort(new Assignment.ComparatorByDate());
+        return assignmentList;
     }
 
 }

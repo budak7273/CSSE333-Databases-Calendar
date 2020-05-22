@@ -154,6 +154,17 @@ public class CalendarDBJava extends JFrame {
         });
         listCalendarsButton.setBounds(50,100,95,30);
         container.add(listCalendarsButton);
+        
+        JButton exportButton = new JButton("Export Events");
+        listCalendarsButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                //CONTENT HERE LATER
+            }
+
+        });
+        exportButton.setBounds(50,100,95,30);
+        container.add(exportButton);
 
         assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername());
         monthView.updateAssignmentList(assignmentList);

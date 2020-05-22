@@ -1,12 +1,12 @@
-W-- =============================================
+-- =============================================
 -- Author:		Thomas Nandola
 -- Create date: May 6th, 2020
 -- Description:	Procedure to Delete from the ClassSection Table.
 -- =============================================
-
+/*
 EXEC delete_ClassSection 7
 select * from ClassSection
-
+*/
 
 USE CalendarDB
 GO

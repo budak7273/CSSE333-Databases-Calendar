@@ -82,6 +82,10 @@ public class Assignment {
 
     }
 
+    public String getEventDescription() {
+        return EventDescription;
+    }
+
 
     public static class ComparatorByDate implements Comparator<Assignment> {
         @Override

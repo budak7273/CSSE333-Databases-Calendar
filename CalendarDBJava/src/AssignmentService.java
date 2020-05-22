@@ -20,7 +20,7 @@ public class AssignmentService {
     public ArrayList<Assignment> getAllAssignments() {
         ArrayList<Assignment> assignments = new ArrayList<>();
 
-        System.out.printf("Fetching assignments for User %s", username);
+        System.out.printf("Fetching assignments for User %s... ", username);
         dbService.connect();
         Connection con = dbService.getConnection();
         PreparedStatement getAllAssignmentsPS = null;
@@ -105,21 +105,22 @@ public class AssignmentService {
         eventType = JOptionPane.showInputDialog("Enter Assignment Type (Test, Quiz, etc.): ");
         if (eventType == null) return false;
 
-        eventSpecificColor = JColorChooser.showDialog(null, "Choose an Event Color", null).getRGB();
-        System.out.println(eventSpecificColor);
-        
         HashMap<String, Integer> mapping = calendarSharingHandler.getFriendlyStringIDMapping(calendarSharingHandler.getAllAccessibleCalendars());
         String[] choices = {};
         String parentClassCalendarIDString = JOptionPane.showInputDialog(null, "Select an existing Calendar to add this to.", "Calendar Selection", JOptionPane.QUESTION_MESSAGE, null, mapping.keySet().toArray(choices), 1).toString();
         if (parentClassCalendarIDString == null) return false;
-        
-        
+
         try {
             parentClassCalendarID = mapping.get(parentClassCalendarIDString);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Class Calendar is an int.\nPlease try again.");
             return false;
         }
+
+        eventSpecificColor = JColorChooser.showDialog(null, "Choose an Event Color", null).getRGB();    // TODO: Use calendar color as default
+        System.out.println(eventSpecificColor);
+        
+
 
         eventDescription = JOptionPane.showInputDialog("Enter Assignment Description");
         if (eventDescription == null) return false;
@@ -179,7 +180,7 @@ public class AssignmentService {
 
     public ArrayList<Assignment> getAllAssignmentsSortedByDate() {
         ArrayList<Assignment> assignmentList = getAllAssignments();
-        getAllAssignments().sort(new Assignment.ComparatorByDate());
+        assignmentList.sort(new Assignment.ComparatorByDate());
         return assignmentList;
     }
 

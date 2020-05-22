@@ -1,15 +1,22 @@
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-public class MonthView {
+public class MonthView extends View {
+    JButton prevMonthButton;
+    JButton todayButton;
+    JButton nextMonthButton;
+
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
     private Font monthTitleFont = new Font("Helvetica", Font.PLAIN, 30);
     private Color dayColor = Color.DARK_GRAY;
     private Color monthViewBorderColor = Color.BLACK;
-    private Color monthViewBackgroundColor = new Color(0x800000);
+    private Color viewBackgroundColor = new Color(0x800000);
     private Color monthViewDateColor = Color.WHITE;
     private int monthWidth = 1400;
     private int monthHeight = 800;
@@ -20,20 +27,16 @@ public class MonthView {
     private int horizontalDaySeparation = 5;
     private int verticalDaySeparation = 5;
     private int eventVerticalSeparation = 4;
+    private int progressBarThickness = 4;
     private int dayWidth;
     private int dayHeight;
     private Graphics g;
-    private ArrayList<Assignment> assignmentList;
     private int maxEventsDisplayed = 3;
     private int firstDayOfMonth;
     private int daysInMonth;
     private int weeksInMonth;
     private int year;
     private int month;
-
-    public void updateAssignmentList(ArrayList<Assignment> assignmentList) {
-        this.assignmentList = assignmentList;
-    }
 
     public MonthView() {
 
@@ -100,7 +103,7 @@ public class MonthView {
     public void draw(Graphics g) {
         this.g = g;
 
-        System.out.printf("Drawing month %d, year %d\n", month, year);
+        System.out.printf("Drawing MonthView (month %d, year %d)\n", month, year);
 
         // Month background
         g.setColor(monthViewBorderColor);
@@ -167,23 +170,25 @@ public class MonthView {
         }
     }
 
-    private void drawAssignment(Assignment assignment, int x, int y, int width, int height) {
-        Color color = new Color(assignment.getEventSpecificColor());
-        float colorBrightness = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[2];
+    private void drawAssignment(Assignment a, int x, int y, int width, int height) {
+        assignmentLocationList.add(new AssignmentWrapper(a, x, y, width, height));
 
-        g.setColor(color);
+        Color assignmentColor = new Color(a.getEventSpecificColor());
+        float colorBrightness = Color.RGBtoHSB(assignmentColor.getRed(), assignmentColor.getGreen(), assignmentColor.getBlue(), null)[2];
+
+        g.setColor(assignmentColor);
         g.fillRect(x, y, width, height);
 
-        String eventName = assignment.getEventName();
+        String eventName = a.getEventName();
         eventName = eventName.length() > 22 ? eventName.substring(0, 22) + "..." : eventName;
 
         g.setColor(colorBrightness > .8f ? Color.BLACK : Color.WHITE);
         g.drawString(eventName, x + horizontalDaySeparation, y + 20);
 
         g.setColor(Color.BLACK);
-        g.fillRect(x, y, width, 4);
+        g.fillRect(x, y, width, progressBarThickness);
         g.setColor(Color.WHITE);
-        g.fillRect(x, y, width * assignment.getEventProgress() / 100, 4);
+        g.fillRect(x, y, width * a.getEventProgress() / 100, progressBarThickness);
     }
 
     /**
@@ -198,7 +203,60 @@ public class MonthView {
         weeksInMonth = cal.getActualMaximum(Calendar.WEEK_OF_MONTH);
     }
 
-    public Color getMonthViewBackgroundColor() {
-        return monthViewBackgroundColor;
+    @Override
+    public Color getViewBackgroundColor() {
+        return viewBackgroundColor;
     }
+
+    @Override
+    public void addViewButtons(CalendarDBJava calDB) {
+        prevMonthButton = new JButton("Prev. Month");
+        prevMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                calDB.getMonthView().setPreviousMonth();
+                calDB.repaint();
+            }
+        });
+        prevMonthButton.setBounds(50,100,95,30);
+        calDB.getContainer().add(prevMonthButton);
+
+        todayButton = new JButton("Today");
+        todayButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                calDB.getMonthView().setCurrentMonth();
+                calDB.repaint();
+            }
+        });
+        todayButton.setBounds(50,100,95,30);
+        calDB.getContainer().add(todayButton);
+
+        nextMonthButton = new JButton("Next Month");
+        nextMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                calDB.getMonthView().setNextMonth();
+                calDB.repaint();
+            }
+        });
+        nextMonthButton.setBounds(50,100,95,30);
+        calDB.getContainer().add(nextMonthButton);
+    }
+
+    @Override
+    public void showViewButtons(CalendarDBJava calDB) {
+        prevMonthButton.show();
+        todayButton.show();
+        nextMonthButton.show();
+    }
+
+    @Override
+    public void hideViewButtons(CalendarDBJava calDB) {
+        prevMonthButton.hide();
+        todayButton.hide();
+        nextMonthButton.hide();
+    }
+
+
 }

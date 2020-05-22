@@ -29,7 +29,7 @@ CREATE PROCEDURE [insert_Assignment]
  @Type_4					[nvarchar](20) = null,
  @EventSpecificColor_5		[int] = null,
  @ParentClassCalendarID_6	[int],
- @ParentClassSectionID_7	[int] = null, --TODO were we going to be removing this, since there is already a link to it via the class calendar?
+ @ParentClassSectionID_7	[int] = null,
  @ImportSourceID_8			[int] = null,
  @EventDescription_9		[varchar](257) = null)
 AS
@@ -73,6 +73,12 @@ AS
 	BEGIN
 		PRINT N'EventDescription above maximum of 257 characters'
 		RETURN 1
+	END
+
+	--Set @ParentClassSectionID_7 to null class section if -1
+	IF @ParentClassSectionID_7 = -1
+	BEGIN
+		SET @ParentClassSectionID_7 = null
 	END
 
 	--If @EventProgress_3 is given as null, set it to 0

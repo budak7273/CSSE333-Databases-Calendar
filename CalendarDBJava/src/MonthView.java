@@ -1,10 +1,17 @@
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 public class MonthView extends View {
+    JButton prevMonthButton;
+    JButton todayButton;
+    JButton nextMonthButton;
+
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
     private Font monthTitleFont = new Font("Helvetica", Font.PLAIN, 30);
     private Color dayColor = Color.DARK_GRAY;
@@ -20,20 +27,16 @@ public class MonthView extends View {
     private int horizontalDaySeparation = 5;
     private int verticalDaySeparation = 5;
     private int eventVerticalSeparation = 4;
+    private int progressBarThickness = 4;
     private int dayWidth;
     private int dayHeight;
     private Graphics g;
-    private ArrayList<Assignment> assignmentList;
     private int maxEventsDisplayed = 3;
     private int firstDayOfMonth;
     private int daysInMonth;
     private int weeksInMonth;
     private int year;
     private int month;
-
-    public void updateAssignmentList(ArrayList<Assignment> assignmentList) {
-        this.assignmentList = assignmentList;
-    }
 
     public MonthView() {
 
@@ -100,7 +103,7 @@ public class MonthView extends View {
     public void draw(Graphics g) {
         this.g = g;
 
-        System.out.printf("Drawing month %d, year %d\n", month, year);
+        System.out.printf("Drawing MonthView (month %d, year %d)\n", month, year);
 
         // Month background
         g.setColor(monthViewBorderColor);
@@ -183,9 +186,9 @@ public class MonthView extends View {
         g.drawString(eventName, x + horizontalDaySeparation, y + 20);
 
         g.setColor(Color.BLACK);
-        g.fillRect(x, y, width, 4);
+        g.fillRect(x, y, width, progressBarThickness);
         g.setColor(Color.WHITE);
-        g.fillRect(x, y, width * a.getEventProgress() / 100, 4);
+        g.fillRect(x, y, width * a.getEventProgress() / 100, progressBarThickness);
     }
 
     /**
@@ -200,7 +203,60 @@ public class MonthView extends View {
         weeksInMonth = cal.getActualMaximum(Calendar.WEEK_OF_MONTH);
     }
 
+    @Override
     public Color getViewBackgroundColor() {
         return viewBackgroundColor;
     }
+
+    @Override
+    public void addViewButtons(CalendarDBJava calDB) {
+        prevMonthButton = new JButton("Prev. Month");
+        prevMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                calDB.getMonthView().setPreviousMonth();
+                calDB.repaint();
+            }
+        });
+        prevMonthButton.setBounds(50,100,95,30);
+        calDB.getContainer().add(prevMonthButton);
+
+        todayButton = new JButton("Today");
+        todayButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                calDB.getMonthView().setCurrentMonth();
+                calDB.repaint();
+            }
+        });
+        todayButton.setBounds(50,100,95,30);
+        calDB.getContainer().add(todayButton);
+
+        nextMonthButton = new JButton("Next Month");
+        nextMonthButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                calDB.getMonthView().setNextMonth();
+                calDB.repaint();
+            }
+        });
+        nextMonthButton.setBounds(50,100,95,30);
+        calDB.getContainer().add(nextMonthButton);
+    }
+
+    @Override
+    public void showViewButtons(CalendarDBJava calDB) {
+        prevMonthButton.show();
+        todayButton.show();
+        nextMonthButton.show();
+    }
+
+    @Override
+    public void hideViewButtons(CalendarDBJava calDB) {
+        prevMonthButton.hide();
+        todayButton.hide();
+        nextMonthButton.hide();
+    }
+
+
 }

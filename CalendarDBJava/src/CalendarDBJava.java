@@ -65,15 +65,31 @@ public class CalendarDBJava extends JFrame {
             }
         });
 
-        addAllButtons();
+        addSharedButtons();
 
         updateAndRedrawAssignments();
-        setVisible(true);   // Fixes buttons not rendering.
+
+        setVisible(false);  // Fixes buttons not rendering.
+        setVisible(true);
     }
 
     @SuppressWarnings("unused")
 	public static void main(String[] args) {
         CalendarDBJava application = new CalendarDBJava();
+        application.addViewButtons();
+    }
+
+    private void addViewButtons() {
+        monthView.addViewButtons(this);
+        monthView.hideViewButtons(this);
+        upcomingEventsView.addViewButtons(this);
+        upcomingEventsView.hideViewButtons(this);
+
+        displayedView.showViewButtons(this);
+
+        container.setVisible(false);
+        container.setVisible(true);
+        this.repaint();
     }
 
     @Override
@@ -82,46 +98,26 @@ public class CalendarDBJava extends JFrame {
         displayedView.draw(g, getSize());
     }
     
-    private void updateAndRedrawAssignments() {
+    public void updateAndRedrawAssignments() {
         ArrayList<Assignment> assignmentList = assignmentService.getAllAssignmentsSortedByDate();
         displayedView.updateAssignmentList(assignmentList);
         container.setBackground(displayedView.getViewBackgroundColor());
         repaint();
     }
 
-    private void addAllButtons() {
-        JButton prevMonthButton = new JButton("Prev. Month");
-        prevMonthButton.addActionListener(new ActionListener(){
+    private void addSharedButtons() {
+        CalendarDBJava myThis = this;
+        JButton switchViewButton = new JButton("Switch View");
+        switchViewButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                monthView.setPreviousMonth();
-                repaint();
+                myThis.swapViews();
+                updateAndRedrawAssignments();
             }
         });
-        prevMonthButton.setBounds(50,100,95,30);
-        container.add(prevMonthButton);
+        switchViewButton.setBounds(50,100,95,30);
+        container.add(switchViewButton);
 
-        JButton todayButton = new JButton("Today");
-        todayButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                monthView.setCurrentMonth();
-                repaint();
-            }
-        });
-        todayButton.setBounds(50,100,95,30);
-        container.add(todayButton);
-
-        JButton nextMonthButton = new JButton("Next Month");
-        nextMonthButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                monthView.setNextMonth();
-                repaint();
-            }
-        });
-        nextMonthButton.setBounds(50,100,95,30);
-        container.add(nextMonthButton);
 
         JButton resetPasswordButton = new JButton("Reset Password");
         resetPasswordButton.addActionListener(new ActionListener(){
@@ -214,21 +210,29 @@ public class CalendarDBJava extends JFrame {
         });
         createNewAssignmentButton.setBounds(50,100,95,30);
         container.add(createNewAssignmentButton);
+    }
 
-        JButton switchViewButton = new JButton("Switch View");
-        switchViewButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                if (monthView.equals(displayedView)) {
-                    displayedView = upcomingEventsView;
-                } else if (upcomingEventsView.equals(displayedView)) {
-                    displayedView = monthView;
-                }
-                updateAndRedrawAssignments();
-            }
-        });
-        switchViewButton.setBounds(50,100,95,30);
-        container.add(switchViewButton);
+    private void swapViews() {
+        displayedView.hideViewButtons(this);
+        if (monthView.equals(displayedView)) {
+            displayedView = upcomingEventsView;
+        } else if (upcomingEventsView.equals(displayedView)) {
+            displayedView = monthView;
+        }
+        displayedView.showViewButtons(this);
+        container.setVisible(false);
+        container.setVisible(true);
+    }
 
+    public Container getContainer() {
+        return container;
+    }
+
+    public MonthView getMonthView() {
+        return monthView;
+    }
+
+    public UpcomingEventsView getUpcomingEventsView() {
+        return upcomingEventsView;
     }
 }

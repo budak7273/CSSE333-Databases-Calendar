@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7,6 +9,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class UpcomingEventsView extends View {
+    JButton filterButton;
+
     private Font assignmentFont = new Font("Helvetica", Font.PLAIN, 15);
     private Font dateFont = new Font("Helvetica", Font.PLAIN, 30);
     private Color assignmentListBackgroundColor = Color.DARK_GRAY;
@@ -29,6 +33,10 @@ public class UpcomingEventsView extends View {
     private int assignmentVerticalSeparation = 5;
     private int assignmentLeftMargin = 5;
     private int assignmentRightMargin = 5;
+
+    private int assignmentTextLengthLimit = 60;
+
+    private int progressBarThickness = 7;
 
 
     private Color monthViewDateColor = Color.WHITE;
@@ -53,7 +61,7 @@ public class UpcomingEventsView extends View {
     public void draw(Graphics g) {
         this.g = g;
 
-        System.out.print("Drawing Upcoming Assignments View... ");
+        System.out.print("Drawing UpcomingAssignmentsView... ");
 
         // Month background
         g.setColor(assignmentListBackgroundColor);
@@ -83,31 +91,74 @@ public class UpcomingEventsView extends View {
     }
 
     private void drawAssignment(Assignment a, int i) {
-        // Calculate x & y and store for evaluating clicks.
+        // Calculate x & y
         int x = leftMargin + assignmentLeftMargin;
         int y = i * (assignmentHeight + assignmentVerticalSeparation) + topMargin + assignmentVerticalSeparation;
+
+        // Store assignment and position for processing clicks.
         assignmentLocationList.add(new AssignmentWrapper(a, x, y, assignmentWidth, assignmentHeight));
 
+        // Set event color
         Color assignmentColor = new Color(a.getEventSpecificColor());
         g.setColor(assignmentColor);
         g.fillRect(x, y, assignmentWidth, assignmentHeight);
 
-        String eventName = a.getEventName();
-        eventName = eventName.length() > 60 ? eventName.substring(0, 60) + "..." : eventName;
+        // Format Assignment String and cut off if exceeds limit.
+        String assignmentDateStr = new SimpleDateFormat("MMMM d, YYYY").format(a.getEventDate());
+        String assignmentText = String.format("%s: %s", assignmentDateStr, a.getEventName());
+        assignmentText = assignmentText.length() > assignmentTextLengthLimit ? assignmentText.substring(0, assignmentTextLengthLimit) + "..." : assignmentText;
 
+        // Determine text color
         float colorBrightness = Color.RGBtoHSB(assignmentColor.getRed(), assignmentColor.getGreen(),
                 assignmentColor.getBlue(), null)[2];
         g.setColor(colorBrightness > .8f ? Color.BLACK : Color.WHITE);
+
+        // Display Text
         g.setFont(assignmentFont);
-        g.drawString(eventName, x + 5, y + 15);
+        g.drawString(assignmentText, x + 5, y + 15);
+
+        // Show Progress Bar
+        int progressBarY = y + assignmentHeight - progressBarThickness;
+
+        g.setColor(Color.BLACK);
+        g.fillRect(x, progressBarY, assignmentWidth, progressBarThickness);
+        g.setColor(Color.WHITE);
+        g.fillRect(x, progressBarY, assignmentWidth * a.getEventProgress() / 100, progressBarThickness);
     }
 
-
+    private boolean filterPrompt() {
+        return true;
+    }
 
 
 
     @Override
     public Color getViewBackgroundColor() {
         return viewBackgroundColor;
+    }
+
+    @Override
+    public void addViewButtons(CalendarDBJava calDB) {
+        filterButton = new JButton("Filter");
+        filterButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if (calDB.getUpcomingEventsView().filterPrompt()) {
+                    calDB.updateAndRedrawAssignments();
+                }
+            }
+        });
+        filterButton.setBounds(50,100,95,30);
+        calDB.getContainer().add(filterButton);
+    }
+
+    @Override
+    public void showViewButtons(CalendarDBJava calDB) {
+        filterButton.show();
+    }
+
+    @Override
+    public void hideViewButtons(CalendarDBJava calDB) {
+        filterButton.hide();
     }
 }

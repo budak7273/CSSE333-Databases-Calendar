@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public abstract class View {
 
@@ -65,6 +66,12 @@ public abstract class View {
                 break;
         }
     }
+
+    public abstract void addViewButtons(CalendarDBJava calDB);
+
+    public abstract void showViewButtons(CalendarDBJava calDB);
+
+    public abstract void hideViewButtons(CalendarDBJava calDB);
 
     public abstract Color getViewBackgroundColor();
 

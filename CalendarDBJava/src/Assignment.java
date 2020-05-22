@@ -10,8 +10,9 @@ public class Assignment {
     private int ParentClassCalendarID;
     private int ParentClassSectionID;
     private int ImportSourceID;
+    private String EventDescription;
 
-    public Assignment(int assignmentID, String eventName, Date eventDate, int eventProgress, String eventType, int eventSpecificColor, int parentClassCalendarID, int parentClassSectionID, int importSourceID) {
+    public Assignment(int assignmentID, String eventName, Date eventDate, int eventProgress, String eventType, int eventSpecificColor, int parentClassCalendarID, int parentClassSectionID, int importSourceID, String eventDescription) {
         AssignmentID = assignmentID;
         EventName = eventName;
         EventDate = eventDate;
@@ -21,6 +22,7 @@ public class Assignment {
         ParentClassCalendarID = parentClassCalendarID;
         ParentClassSectionID = parentClassSectionID;
         ImportSourceID = importSourceID;
+        EventDescription = eventDescription;
     }
 
     public Assignment() {}

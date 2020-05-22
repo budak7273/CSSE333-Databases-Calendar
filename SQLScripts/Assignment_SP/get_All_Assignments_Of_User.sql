@@ -43,7 +43,7 @@ AS
 	FROM [Assignment] asn
 		INNER JOIN [ClassCalendar] ccal
 		ON asn.ParentClassCalendarID = ccal.ClassCalendarID
-		INNER JOIN [UserCalendarSharing] ucalShare
+		LEFT JOIN [UserCalendarSharing] ucalShare --left so unshared calendars still show up
 		ON ucalShare.ClassCalendarID = ccal.ClassCalendarID
 	WHERE ccal.ParentUserID = @Username_1 OR ucalShare.Username = @Username_1
 

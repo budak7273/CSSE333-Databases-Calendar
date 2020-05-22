@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -84,7 +85,8 @@ public class ImportHandler {
 			Calendar cal = Calendar.getInstance();
 			//paramQueryPS.setDate(2, new Date(cal.getTimeInMillis()), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
 			long millis = event.getDateStart().getValue().getTime();
-			paramQueryPS.setDate(2, new Date(millis), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
+			paramQueryPS.setTimestamp(2, new Timestamp(millis), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
+			//System.out.println("DateStart for "+ event.getSummary().getValue() + " is " + event.getDateStart().getValue());
 			paramQueryPS.setByte(3, (byte) 0);
 			paramQueryPS.setString(4, null);
 			paramQueryPS.setInt(5, 0);
@@ -207,6 +209,7 @@ public class ImportHandler {
 					paramQueryPS.close();
 			} catch (SQLException e) {
 				JOptionPane.showMessageDialog(null, "An error occurred in closing the statement. See the printed stack trace.");
+				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}
 		}

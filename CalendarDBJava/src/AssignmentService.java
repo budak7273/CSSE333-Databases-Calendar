@@ -1,7 +1,9 @@
 
 import javax.swing.*;
 
+import java.awt.*;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,6 +73,83 @@ public class AssignmentService {
      * Does not update assignment list or redraw calendar, so maybe do that after calling this?
      * @return true if assignment was succesfully added, false otherwise.
      */
+    public boolean updateAssignmentPrompt(Assignment assignmentToUpdate) {
+        String newEventName;
+        Date newEventDate;
+        int newEventProgress;
+        String newEventType;
+        int newEventSpecificColor;
+        int newParentClassCalendarID;
+        String NewEventDescription;
+
+        String eventDateString = JOptionPane.showInputDialog("Update Date", new SimpleDateFormat("MMMM d, YYYY").format(assignmentToUpdate.getEventDate()));
+        if (eventDateString == null) return false;
+        try {
+            newEventDate = new Date(eventDateString);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Date not in specified format.\nPlease try again.");
+            return false;
+        }
+
+        newEventName = JOptionPane.showInputDialog("Enter Assignment Name: ", assignmentToUpdate.getEventName());
+        if (newEventName == null) return false;
+
+        String eventProgressString = JOptionPane.showInputDialog("Enter Event Progress\n(0-100, inclusive): ", Integer.toString(assignmentToUpdate.getEventProgress()));
+        if (eventProgressString == null) return false;
+        try {
+            newEventProgress = Integer.parseInt(eventProgressString);
+            if (newEventProgress > 100 || newEventProgress < 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Event Progress not in specified format.\nPlease try again.");
+            return false;
+        }
+
+        newEventType = JOptionPane.showInputDialog("Enter Assignment Type (Test, Quiz, etc.): ", assignmentToUpdate.getEventType());
+        if (newEventType == null) return false;
+
+        HashMap<String, Integer> mapping = calendarSharingHandler.getFriendlyStringIDMapping(calendarSharingHandler.listAllFollowedCalendars(false));   // TODO: Set Default Value to currently stored calendar
+        String[] options = mapping.keySet().toArray(new String[0]);
+        String desiredIDWithSpace = "" + assignmentToUpdate.getParentClassCalendarID() + " ";
+        int i;
+        System.out.println(desiredIDWithSpace);
+        for (i = 0; i < options.length; i++) {
+            System.out.println(options[i].substring(0,desiredIDWithSpace.length()));
+            if (options[i].substring(0,desiredIDWithSpace.length()).equals(desiredIDWithSpace)) {
+                break;
+            }
+        }
+        if (i == options.length) i = 0;
+        String[] choices = {};
+        String parentClassCalendarIDString = JOptionPane.showInputDialog(null, "Select an existing Calendar to add this to.", "Calendar Selection", JOptionPane.QUESTION_MESSAGE, null, options, options[i]).toString();
+        if (parentClassCalendarIDString == null) return false;
+
+        try {
+            newParentClassCalendarID = mapping.get(parentClassCalendarIDString);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Class Calendar is an int.\nPlease try again.");
+            return false;
+        }
+
+        newEventSpecificColor = JColorChooser.showDialog(null, "Choose an Event Color", new Color(assignmentToUpdate.getEventSpecificColor())).getRGB();    // TODO: Use calendar color as default
+
+        NewEventDescription = JOptionPane.showInputDialog("Enter Assignment Description", assignmentToUpdate.getEventDescription());
+        if (NewEventDescription == null) return false;
+
+        if (insertAssignmentToDB(newEventName, newEventDate, newEventProgress, newEventType, newEventSpecificColor, newParentClassCalendarID, NewEventDescription)) { // add succeeded
+            deleteAssignmentFromDB(assignmentToUpdate.getAssignmentID());
+            JOptionPane.showMessageDialog(null, "Success! Your Assignment was successfully updated.");
+            return true;
+        } else {    // add failed
+            JOptionPane.showMessageDialog(null, "Assignment Update Failed. Please try again later.");
+            return false;
+        }
+    }
+
+    /**
+     * prompts the user to create a new assignment, then adds it to the database.
+     * Does not update assignment list or redraw calendar, so maybe do that after calling this?
+     * @return true if assignment was succesfully added, false otherwise.
+     */
     public boolean createNewAssignmentPrompt() {
         String eventName;
         Date eventDate;
@@ -118,8 +197,7 @@ public class AssignmentService {
         }
 
         eventSpecificColor = JColorChooser.showDialog(null, "Choose an Event Color", null).getRGB();    // TODO: Use calendar color as default
-        System.out.println(eventSpecificColor);
-        
+
 
 
         eventDescription = JOptionPane.showInputDialog("Enter Assignment Description");

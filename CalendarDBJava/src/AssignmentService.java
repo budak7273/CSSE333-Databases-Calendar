@@ -7,6 +7,7 @@ import java.util.Date;
 public class AssignmentService {
     private DatabaseConnectionService dbService;
     private String username;
+    private ArrayList<Assignment> assignmentList;
 
     public AssignmentService(DatabaseConnectionService dbService, String username) {
         this.dbService = dbService;
@@ -145,9 +146,9 @@ public class AssignmentService {
             insertAssignmentsPS.setString(i++, eventType);
             insertAssignmentsPS.setInt(i++, eventSpecificColor);
             insertAssignmentsPS.setInt(i++, parentClassCalendarID);
+            insertAssignmentsPS.setInt(i++, -1); // -1 indicates no (null) class section id (class section is only for downstream duplication)
             insertAssignmentsPS.setString(i++, null);
-            insertAssignmentsPS.setString(i++, null);
-            insertAssignmentsPS.setString(i++, eventDescription); //TODO add description to Assignment Class
+            insertAssignmentsPS.setString(i++, eventDescription);
 
             insertAssignmentsPS.execute();
 
@@ -169,5 +170,4 @@ public class AssignmentService {
         }
         return returnedStatus == 0;
     }
-
 }

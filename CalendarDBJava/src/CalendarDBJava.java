@@ -18,8 +18,6 @@ public class CalendarDBJava extends JFrame {
     private ImportHandler importHandler;
     private CalendarSharingHandler sharingHandler;
 
-    private ArrayList<Assignment> assignmentList;
-
     private static final String SERVER_NAME = "golem.csse.rose-hulman.edu";
     private static final String DATABASE_NAME = "CalendarDB";
 
@@ -159,7 +157,7 @@ public class CalendarDBJava extends JFrame {
         exportButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                ExportHandler.convertAssignmentsToICal(assignmentList);
+                ExportHandler.convertAssignmentsToICal(assignmentService.getAllAssignments());
             }
 
         });
@@ -195,8 +193,7 @@ public class CalendarDBJava extends JFrame {
     }
     
     private void updateAndRedrawAssignments() {
-    	assignmentList = assignmentService.getAllAssignments();
-        monthView.updateAssignmentList(assignmentList);
+        monthView.updateAssignmentList(assignmentService.getAllAssignments());
         repaint();
     }
 }

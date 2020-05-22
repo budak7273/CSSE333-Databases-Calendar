@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class CalendarDBJava extends JFrame {
@@ -59,6 +61,16 @@ public class CalendarDBJava extends JFrame {
             }
         });
 
+        // Click Listener for Viewing/Editing Events in UpcomingEventsView
+        container.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (currentView == View.UPCOMING_EVENTS_VIEW) {
+                    upcomingEventsView.processClick(e);
+                }
+            }
+        });
+
         addAllButtons();
 
         updateAndRedrawAssignments();
@@ -83,7 +95,7 @@ public class CalendarDBJava extends JFrame {
     }
     
     private void updateAndRedrawAssignments() {
-        ArrayList<Assignment> assignmentList = assignmentService.getAllAssignments();
+        ArrayList<Assignment> assignmentList = assignmentService.getAllAssignmentsSortedByDate();
         monthView.updateAssignmentList(assignmentList);
         upcomingEventsView.updateAssignmentList(assignmentList);
         repaint();
@@ -214,5 +226,24 @@ public class CalendarDBJava extends JFrame {
         });
         createNewAssignmentButton.setBounds(50,100,95,30);
         container.add(createNewAssignmentButton);
+
+        JButton switchViewButton = new JButton("Switch View");
+        switchViewButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                switch (currentView) {
+                    case MONTH_VIEW:
+                        currentView = View.UPCOMING_EVENTS_VIEW;
+                        break;
+                    case UPCOMING_EVENTS_VIEW:
+                        currentView = View.MONTH_VIEW;
+                        break;
+                }
+                updateAndRedrawAssignments();
+            }
+        });
+        switchViewButton.setBounds(50,100,95,30);
+        container.add(switchViewButton);
+
     }
 }

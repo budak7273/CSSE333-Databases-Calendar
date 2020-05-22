@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class MonthView {
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
-    private Font monthTileFont = new Font("Helvetica", Font.PLAIN, 30);
+    private Font monthTitleFont = new Font("Helvetica", Font.PLAIN, 30);
     private Color dayColor = Color.DARK_GRAY;
     private Color monthViewBorderColor = Color.BLACK;
     private Color monthViewBackgroundColor = new Color(0x800000);
@@ -15,7 +15,7 @@ public class MonthView {
     private int monthHeight = 800;
     private int leftMargin = 25;
     private int rightMargin = 25;
-    private int topMargin = 40 + 22 + monthTileFont.getSize()  + 10;     // + 22 accounts for Window Bar, + mFT.gS accounts for month title
+    private int topMargin = 40 + 22 + monthTitleFont.getSize()  + 10;     // + 22 accounts for Window Bar, + mFT.gS accounts for month title
     private int bottomMargin = 25;
     private int horizontalDaySeparation = 5;
     private int verticalDaySeparation = 5;
@@ -110,7 +110,7 @@ public class MonthView {
         Calendar cal = Calendar.getInstance();
         cal.set(year, month, 1);
         g.setColor(Color.WHITE);
-        g.setFont(monthTileFont);
+        g.setFont(monthTitleFont);
         g.drawString(new SimpleDateFormat("MMMM YYYY").format(cal.getTime()), leftMargin + 5, topMargin - 10);
 
         int dayOfMonth = 1;

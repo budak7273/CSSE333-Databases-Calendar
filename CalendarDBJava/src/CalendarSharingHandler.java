@@ -2,7 +2,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import javax.swing.JOptionPane;
 
@@ -27,9 +29,16 @@ public class CalendarSharingHandler {
 	}
 	
 	public void followCalendar() {
-		String calendarIDstring = JOptionPane.showInputDialog("Enter the CalendarID to follow");
-		if (calendarIDstring == null) return;
-		int calendarID = Integer.parseInt(calendarIDstring);
+		HashMap<String, Integer> mapping = getFriendlyStringIDMapping(getListAllCalendarsOverall(false));
+        String[] choices = {};
+        String calendarIDString = null;
+		try {
+			calendarIDString = JOptionPane.showInputDialog(null, "Select Calendar to Join\n(All calendars are listed)", "Calendar Join Selection", JOptionPane.QUESTION_MESSAGE, null, mapping.keySet().toArray(choices), 1).toString();
+		} catch (Exception ignored) {
+			//do nothing, we don't care
+		}
+		if (calendarIDString == null) return;
+		int calendarID = mapping.get(calendarIDString);
 		
 		connect();
 		
@@ -70,7 +79,17 @@ public class CalendarSharingHandler {
 	}
 	
 	public void unfollowCalendar() {
-		int calendarID = Integer.parseInt(JOptionPane.showInputDialog("Enter the CalendarID to unfollow"));
+		HashMap<String, Integer> mapping = getFriendlyStringIDMapping(listAllFollowedCalendars(false));
+        String[] choices = {};
+        String calendarIDString = null;
+		try {
+			calendarIDString = JOptionPane.showInputDialog(null, "Select Calendar to Leave\n(Followed calendars are listed)", "Calendar Leave Selection", JOptionPane.QUESTION_MESSAGE, null, mapping.keySet().toArray(choices), 1).toString();
+		} catch (Exception ignored) {
+			//do nothing, we don't care
+		}
+        if (calendarIDString == null) return;
+		int calendarID = mapping.get(calendarIDString);
+
 		connect();
 		
 		String paramQueryString = "{call delete_UserCalendarSharing_Relationship(?,?)}";
@@ -109,7 +128,7 @@ public class CalendarSharingHandler {
 		dbService.closeConnection();
 	}
 	
-	public void listAllCalendars() {
+	public ArrayList<CalendarListing> getListAllCalendarsOverall(boolean display) {
 		connect();
 		
 		String paramQueryString = "{call get_ClassCalendar_List}";
@@ -119,21 +138,22 @@ public class CalendarSharingHandler {
 			paramQueryPS = this.dbService.getConnection().prepareStatement(paramQueryString);
 			StringBuilder sb = new StringBuilder();
 			sb.append("CalendarID   Name   Creator\n");
-			int counter = 0;
+			ArrayList<CalendarListing> calendars = new ArrayList<CalendarListing>();
 			
 			ResultSet rs = paramQueryPS.executeQuery();
             while (rs.next()) {
-            	sb.append(rs.getInt("CalendarID"));
-            	sb.append("   ");
-            	sb.append(rs.getString("Name"));
-            	sb.append("   ");
-            	sb.append(rs.getString("Creator"));
-            	sb.append('\n');
-            	counter++;
+            	calendars.add(new CalendarListing(rs.getInt("CalendarID"), rs.getString("Name"), rs.getString("Creator")));
             }
             
-            System.out.printf("Database Returned %d ClassCalendars.\n", counter);
-            JOptionPane.showMessageDialog(null, sb.toString(), "Available ClassCalendars", JOptionPane.INFORMATION_MESSAGE);
+            System.out.printf("Database Returned %d ClassCalendars.\n", calendars.size());
+            if(display) {
+            	for (CalendarListing calendarListing : calendars) {
+					sb.append(calendarListing.toString());
+					sb.append("\n");
+				}
+            	JOptionPane.showMessageDialog(null, sb.toString(), "Available ClassCalendars", JOptionPane.INFORMATION_MESSAGE);
+            }
+            return calendars;
 		} catch (SQLException e) {
 			System.out.println("Listing FAILED");
 			JOptionPane.showMessageDialog(null, "An error occurred in obtaining the calendar list. See the printed stack trace.");
@@ -150,15 +170,83 @@ public class CalendarSharingHandler {
 		}
 		
 		dbService.closeConnection();
+		return new ArrayList<CalendarListing>();
 	}
 	
-	public void listAllFollowedCalendars() {
+	public class CalendarListing {
+		public int CalendarID;
+		public String Name;
+		public String Creator;
+		
+		public CalendarListing(int calID, String name, String creator) {
+			CalendarID = calID;
+			Name = name;
+			Creator = creator;
+		}
+		
+		public String toString() {
+			return "" + CalendarID + "  " + Name + "  " + Creator;
+		}
+		
+	}
+	
+	public ArrayList<CalendarListing> getAllAccessibleCalendars() {
+		connect();
+		
+		String paramQueryString = "{call get_user_ClassCalendar_List(?)}";
+        
+        PreparedStatement paramQueryPS = null;
+		try {
+			paramQueryPS = this.dbService.getConnection().prepareStatement(paramQueryString);
+			StringBuilder sb = new StringBuilder();
+			sb.append("CalendarID   Name   Creator\n");
+			paramQueryPS.setString(1, username);
+			ArrayList<CalendarListing> calendars = new ArrayList<CalendarListing>();
+			
+			ResultSet rs = paramQueryPS.executeQuery();
+            while (rs.next()) {
+            	calendars.add(new CalendarListing(rs.getInt("CalendarID"), rs.getString("Name"), rs.getString("Creator")));
+            }
+            
+            System.out.printf("Database Returned %d Accessible ClassCalendars.\n", calendars.size());
+            /*for (CalendarListing calendarListing : calendars) {
+				sb.append(calendarListing);
+				sb.append("\n");
+			}
+            return sb.toString();*/
+            return calendars;
+		} catch (SQLException e) {
+			System.out.println("Listing FAILED");
+			JOptionPane.showMessageDialog(null, "An error occurred in obtaining the accessible calendar list. See the printed stack trace.");
+			e.printStackTrace();
+		} finally {
+			try {
+				if (paramQueryPS != null) 
+					paramQueryPS.close();
+			} catch (SQLException e) {
+				System.out.println("Listing FAILED");
+				JOptionPane.showMessageDialog(null, "An error occurred in closing the statement. See the printed stack trace.");
+				e.printStackTrace();
+			}
+		}
+		
+		dbService.closeConnection();
+		return new ArrayList<CalendarListing>();
+	}
+	
+	public HashMap<String, Integer> getFriendlyStringIDMapping(ArrayList<CalendarListing> calendars) {
+        HashMap<String, Integer> mapping = new  HashMap<String, Integer>();
+        for (CalendarSharingHandler.CalendarListing calendarListing : calendars) {
+			mapping.put(calendarListing.toString(), calendarListing.CalendarID);
+		}
+        return mapping;
+	}
+	
+	public ArrayList<CalendarListing> listAllFollowedCalendars(boolean display) {
 		connect();
 		
 		String paramQueryString = "{call get_All_Followed_Calendars_Of_User(?)}";
         
-		
-		
         PreparedStatement paramQueryPS = null;
 		try {
 			paramQueryPS = this.dbService.getConnection().prepareStatement(paramQueryString);
@@ -167,21 +255,22 @@ public class CalendarSharingHandler {
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append("CalendarID   Name   Creator\n");
-			int counter = 0;
+			ArrayList<CalendarListing> calendars = new ArrayList<CalendarListing>();
 			
 			ResultSet rs = paramQueryPS.executeQuery();
             while (rs.next()) {
-            	sb.append(rs.getInt("CalendarID"));
-            	sb.append("   ");
-            	sb.append(rs.getString("Name"));
-            	sb.append("   ");
-            	sb.append(rs.getString("Creator"));
-            	sb.append('\n');
-            	counter++;
+            	calendars.add(new CalendarListing(rs.getInt("CalendarID"), rs.getString("Name"), rs.getString("Creator")));
             }
             
-            System.out.printf("Database Returned %d Followed ClassCalendars.\n", counter);
-	        JOptionPane.showMessageDialog(null, sb.toString(), "Followed ClassCalendars", JOptionPane.INFORMATION_MESSAGE);
+            System.out.printf("Database Returned %d Followed ClassCalendars.\n", calendars.size());
+            if(display) {
+            	for (CalendarListing calendarListing : calendars) {
+					sb.append(calendarListing.toString());
+					sb.append("\n");
+				}
+            	JOptionPane.showMessageDialog(null, sb.toString(), "Followed ClassCalendars", JOptionPane.INFORMATION_MESSAGE);
+            }
+	        return calendars;
 		} catch (SQLException e) {
 			System.out.println("Listing FAILED");
 			JOptionPane.showMessageDialog(null, "An error occurred in obtaining the followed calendar list. See the printed stack trace.");
@@ -198,5 +287,6 @@ public class CalendarSharingHandler {
 		}
 		
 		dbService.closeConnection();
+		return new ArrayList<CalendarListing>();
 	}
 }

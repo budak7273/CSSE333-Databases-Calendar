@@ -46,11 +46,15 @@ public class CalendarDBJava extends JFrame {
         userAccessControl = new UserAccessControl(dbConnectService);
         userAccessControl.startupPrompt();
 
-        assignmentService = new AssignmentService(dbConnectService, userAccessControl.getUsername());
+        if (!userAccessControl.startupPrompt()) {   // User cancelled login/register screen
+            System.exit(0);
+        }
+        sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
+        assignmentService = new AssignmentService(dbConnectService, userAccessControl.getUsername(), sharingHandler);
         monthView.setCurrentMonth();
         
         importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
-        sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
+        
 
         // Close DB connection on exit
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -184,7 +188,7 @@ public class CalendarDBJava extends JFrame {
         listFollowedCalendarsButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                sharingHandler.listAllFollowedCalendars();
+                sharingHandler.listAllFollowedCalendars(true);
                 updateAndRedrawAssignments();
             }
 
@@ -192,17 +196,17 @@ public class CalendarDBJava extends JFrame {
         listFollowedCalendarsButton.setBounds(50,100,95,30);
         container.add(listFollowedCalendarsButton);
 
-        JButton listCalendarsButton = new JButton("List all Calendars");
-        listCalendarsButton.addActionListener(new ActionListener(){
+        /*JButton listCalendarsButton = new JButton("List all Calendars");
+		listCalendarsButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                sharingHandler.listAllCalendars();
+                sharingHandler.getListAllCalendarsOverall(true);
                 updateAndRedrawAssignments();
             }
 
         });
         listCalendarsButton.setBounds(50,100,95,30);
-        container.add(listCalendarsButton);
+        container.add(listCalendarsButton);*/
 
         JButton exportButton = new JButton("Export Events");
         exportButton.addActionListener(new ActionListener(){

@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -45,21 +46,34 @@ public class ImportHandler {
 		JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
 		fc.setFileFilter(new FileNameExtensionFilter("iCalendar Files (.ics)", "ics"));
 		
+		//System.out.println(java.awt.Color.RED.getRGB()); //demo color -65536 is red
+		
 		System.out.println("Select an iCal file to test.");
 		int rVal = fc.showOpenDialog(null);
 		
 		if(rVal == 0) { //successfully opened file
 			File iCalFile = fc.getSelectedFile();
 			System.out.println("You selected the file " + iCalFile.getName());
+			
+			int defaultEventColor = java.awt.Color.BLACK.getRGB();
+			try {
+				defaultEventColor = JColorChooser.showDialog(null, "Select default event color for import", java.awt.Color.BLACK).getRGB();
+						//Integer.parseInt(JOptionPane.showInputDialog("Enter a default event color integer (ex. -65536 for red), or leave blank."));
+			} catch (Exception ex) {
+				System.out.println("Error in color int parsing, using default color");
+				JOptionPane.showMessageDialog(null, "Your color code is invalid. The default color is being used.");
+			}
+			
 			try {
 				System.out.println("Parsing with Biweekly...");
 				dbService = new DatabaseConnectionService(serverNameToUse, databaseNameToUse);
 				dbService.connect();
-				boolean tmp = biweeklyParse(iCalFile);
+				boolean tmp = biweeklyParse(iCalFile, defaultEventColor);
 				dbService.closeConnection();
 				return tmp;
 			} catch (Exception e) {
 				System.out.println("Biweekly failed to parse the file");
+				JOptionPane.showMessageDialog(null, "The calendar file could not be parsed for import.");
 				return false;
 			}
 		}
@@ -73,7 +87,7 @@ public class ImportHandler {
 	 * @param importSourceID The import source obtained from running the create import source sproc
 	 * @return
 	 */
-	public boolean addAssignmentFromICalParse(VEvent event, int parentClassCalendarID, int importSourceID) {
+	public boolean addAssignmentFromICalParse(VEvent event, int parentClassCalendarID, int importSourceID, int defaultEventColor) {
         String paramQueryString = "{call insert_Assignment(?,?,?,?,?,?,?,?,?)}";
         System.out.println("Using calID " + parentClassCalendarID + " isID " + importSourceID);
         
@@ -81,19 +95,20 @@ public class ImportHandler {
 		try {
 			paramQueryPS = this.dbService.getConnection().prepareStatement(paramQueryString);
 			
-			paramQueryPS.setString(1, event.getSummary().getValue());//"DemoJavaEvent");
+			paramQueryPS.setString(1, event.getSummary().getValue()); //name
 			Calendar cal = Calendar.getInstance();
-			//paramQueryPS.setDate(2, new Date(cal.getTimeInMillis()), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
+			//paramQueryPS.setDate(2, new Date(cal.getTimeInMillis()), cal);
 			long millis = event.getDateStart().getValue().getTime();
-			paramQueryPS.setTimestamp(2, new Timestamp(millis), cal); //TODO look into the int, Date, Calendar constructor for timezone adjustment?
+			paramQueryPS.setTimestamp(2, new Timestamp(millis), cal); //date
 			//System.out.println("DateStart for "+ event.getSummary().getValue() + " is " + event.getDateStart().getValue());
-			paramQueryPS.setByte(3, (byte) 0);
-			paramQueryPS.setString(4, null);
-			paramQueryPS.setInt(5, 0);
+			paramQueryPS.setByte(3, (byte) 0); //event progress
+			paramQueryPS.setString(4, null); //type
+			int colorInt = defaultEventColor; //Converting between X11 color name necessary //(event.getColor() == null) ? defaultEventColor : event.getColor().getValue();
+			paramQueryPS.setInt(5, colorInt); //color
 			paramQueryPS.setInt(6, parentClassCalendarID);//for testing, use ID#2
-			paramQueryPS.setInt(7, 4); //TODO set this to the passed parentClassSectionID instead of testing ID#4
+			paramQueryPS.setInt(7, 4); //parent class section TODO use not default
 			paramQueryPS.setInt(8, importSourceID); //for testing, use ID#1
-			paramQueryPS.setString(9, event.getDescription().getValue());
+			paramQueryPS.setString(9, event.getDescription().getValue()); //description
 			
 	        int rCode = paramQueryPS.executeUpdate(); //for some reason this returns 1 for success and -1 for failure. This is not documented seemingly anywhere I could find?
 	        //System.out.println(rCode);
@@ -121,7 +136,7 @@ public class ImportHandler {
         return false;
 	}
 	
-	private boolean biweeklyParse(File calfile) throws Exception {
+	private boolean biweeklyParse(File calfile, int defaultEventColor) throws Exception {
 		
 		StringBuilder strBuild = new StringBuilder();
 		String str= "";
@@ -160,7 +175,7 @@ public class ImportHandler {
 				try {
 					printEventDetails(thisEvent, false);
 					System.out.println("attempting to upload...");
-					addAssignmentFromICalParse(thisEvent, newIDsToUse.classCalendarID, newIDsToUse.importSourceID);
+					addAssignmentFromICalParse(thisEvent, newIDsToUse.classCalendarID, newIDsToUse.importSourceID, defaultEventColor);
 				} catch (NullPointerException ex) {
 					System.out.println("A property of this event failed to be processed.");
 				}

@@ -1,16 +1,20 @@
 
 import javax.swing.*;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class AssignmentService {
     private DatabaseConnectionService dbService;
+    private CalendarSharingHandler calendarSharingHandler;
     private String username;
 
-    public AssignmentService(DatabaseConnectionService dbService, String username) {
+    public AssignmentService(DatabaseConnectionService dbService, String username, CalendarSharingHandler calShare) {
         this.dbService = dbService;
         this.username = username;
+        this.calendarSharingHandler = calShare;
     }
 
     public ArrayList<Assignment> getAllAssignments() {
@@ -104,11 +108,15 @@ public class AssignmentService {
 
         eventSpecificColor = JColorChooser.showDialog(null, "Choose an Event Color", null).getRGB();
         System.out.println(eventSpecificColor);
-
-        String parentClassCalendarIDString = JOptionPane.showInputDialog("Enter the CalendarID to add this event to.");
+        
+        HashMap<String, Integer> mapping = calendarSharingHandler.getFriendlyStringIDMapping(calendarSharingHandler.getAllAccessibleCalendars());
+        String[] choices = {};
+        String parentClassCalendarIDString = JOptionPane.showInputDialog(null, "Select an existing Calendar to add this to.", "Calendar Selection", JOptionPane.QUESTION_MESSAGE, null, mapping.keySet().toArray(choices), 1).toString();
         if (parentClassCalendarIDString == null) return false;
+        
+        
         try {
-            parentClassCalendarID = Integer.parseInt(parentClassCalendarIDString);
+            parentClassCalendarID = mapping.get(parentClassCalendarIDString);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Class Calendar is an int.\nPlease try again.");
             return false;

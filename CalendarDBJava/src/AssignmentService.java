@@ -1,17 +1,19 @@
 
-import java.awt.*;
+import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class AssignmentService {
     private DatabaseConnectionService dbService;
+    private String username;
 
-    public AssignmentService(DatabaseConnectionService dbService) {
+    public AssignmentService(DatabaseConnectionService dbService, String username) {
         this.dbService = dbService;
+        this.username = username;
     }
 
-    public ArrayList<Assignment> getAllAssignmentsForUser(String username) {
+    public ArrayList<Assignment> getAllAssignments() {
         ArrayList<Assignment> assignments = new ArrayList<>();
 
         System.out.printf("Fetching assignments for User %s", username);
@@ -58,4 +60,113 @@ public class AssignmentService {
         
         return assignments;
     }
+
+
+    /**
+     * prompts the user to create a new assignment, then adds it to the database.
+     * Does not update assignment list or redraw calendar, so maybe do that after calling this?
+     * @return true if assignment was succesfully added, false otherwise.
+     */
+    public boolean createNewAssignmentPrompt() {
+        String eventName;
+        Date eventDate;
+        int eventProgress;
+        String eventType;
+        int eventSpecificColor;
+        int parentClassCalendarID;
+        String eventDescription;
+
+        String eventDateString = JOptionPane.showInputDialog("Enter Event Date in MM/DD/YYYY format");
+        if (eventDateString == null) return false;
+        try {
+            eventDate = new Date(eventDateString);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Date not in specified format.\nPlease try again.");
+            return false;
+        }
+
+        eventName = JOptionPane.showInputDialog("Enter Assignment Name: ");
+        if (eventName == null) return false;
+
+        String eventProgressString = JOptionPane.showInputDialog("Enter Event Progress\n(0-100, inclusive): ");
+        if (eventProgressString == null) return false;
+        try {
+            eventProgress = Integer.parseInt(eventProgressString);
+            if (eventProgress > 100 || eventProgress < 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Event Progress not in specified format.\nPlease try again.");
+            return false;
+        }
+
+        eventType = JOptionPane.showInputDialog("Enter Assignment Type (Test, Quiz, etc.): ");
+        if (eventType == null) return false;
+
+        eventSpecificColor = JColorChooser.showDialog(null, "Choose an Event Color", null).getRGB();
+        System.out.println(eventSpecificColor);
+
+        String parentClassCalendarIDString = JOptionPane.showInputDialog("Enter the CalendarID to add this event to.");
+        if (parentClassCalendarIDString == null) return false;
+        try {
+            parentClassCalendarID = Integer.parseInt(parentClassCalendarIDString);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Class Calendar is an int.\nPlease try again.");
+            return false;
+        }
+
+        eventDescription = JOptionPane.showInputDialog("Enter Assignment Description");
+        if (eventDescription == null) return false;
+
+        if (insertAssignmentToDB(eventName, eventDate, eventProgress, eventType, eventSpecificColor, parentClassCalendarID, eventDescription)) { // add succeeded
+            JOptionPane.showMessageDialog(null, "Success! Your Assignment was successfully added.");
+            return true;
+        } else {    // add failed
+            JOptionPane.showMessageDialog(null, "Assignment Insert Failed. Please try again later.");
+            return false;
+        }
+    }
+
+    private boolean insertAssignmentToDB(String eventName, Date eventDate, int eventProgress, String eventType, int eventSpecificColor, int parentClassCalendarID, String eventDescription) {
+        System.out.printf("Inserting new assignment with name\"%s\", date \"%s\", progress \"%d\", type \"%s\", color \"%d\", parentClassCalendarID \"%d\", and description \"%s\"...", eventName, eventDate, eventProgress, eventType, eventSpecificColor, parentClassCalendarID, eventDescription);
+
+        dbService.connect();
+        Connection con = dbService.getConnection();
+        CallableStatement insertAssignmentsPS = null;
+        int returnedStatus = 5001;
+
+        try {
+            String insertAsQueryString = "{? = call insert_Assignment(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+            insertAssignmentsPS = this.dbService.getConnection().prepareCall(insertAsQueryString);
+            int i = 1;
+            insertAssignmentsPS.registerOutParameter(i++, Types.INTEGER);
+            insertAssignmentsPS.setString(i++, eventName);
+            insertAssignmentsPS.setDate(i++, new java.sql.Date(eventDate.getTime()));
+            insertAssignmentsPS.setInt(i++, eventProgress);
+            insertAssignmentsPS.setString(i++, eventType);
+            insertAssignmentsPS.setInt(i++, eventSpecificColor);
+            insertAssignmentsPS.setInt(i++, parentClassCalendarID);
+            insertAssignmentsPS.setString(i++, null);
+            insertAssignmentsPS.setString(i++, null);
+            insertAssignmentsPS.setString(i++, eventDescription); //TODO add description to Assignment Class
+
+            insertAssignmentsPS.execute();
+
+            returnedStatus = insertAssignmentsPS.getInt(1);
+            System.out.println("insert_Assignment returned " + returnedStatus);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (insertAssignmentsPS != null) {
+                    System.out.println("Closing insertAssignmentToDB Connection");
+                    insertAssignmentsPS.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return returnedStatus == 0;
+    }
+
 }

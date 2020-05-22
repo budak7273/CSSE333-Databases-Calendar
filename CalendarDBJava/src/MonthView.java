@@ -8,8 +8,8 @@ import java.util.Date;
 
 public class MonthView {
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
-    private Color dayColor = Color.BLACK;
-    private Color monthViewBorderColor = Color.DARK_GRAY;
+    private Color dayColor = Color.DARK_GRAY;
+    private Color monthViewBorderColor = Color.BLACK;
     private Color monthViewBackgroundColor = new Color(0x800000);
     private Color monthViewDateColor = Color.WHITE;
     private int monthWidth = 1400;
@@ -20,6 +20,7 @@ public class MonthView {
     private int bottomMargin = 25;
     private int horizontalDaySeparation = 5;
     private int verticalDaySeparation = 5;
+    private int eventVerticalSeparation = 4;
     private int dayWidth;
     private int dayHeight;
     private Graphics g;
@@ -151,7 +152,7 @@ public class MonthView {
         int eventHeight = dayHeight / (maxEventsDisplayed + 1);
         for (Assignment a : assignmentList) {
             if (a.getEventDate().getYear() == year - 1900 && a.getEventDate().getMonth() == month && a.getEventDate().getDate() == dayOfMonth) {
-                drawAssignment(a, x + 5, y + 30 + eventHeight * eventsDisplayed, dayWidth - 15, eventHeight);
+                drawAssignment(a, x + 5, y + 30 + (eventHeight) * eventsDisplayed, dayWidth - 15, eventHeight - eventVerticalSeparation);
 
                 eventsDisplayed++;
                 if (eventsDisplayed >= maxEventsDisplayed) return;
@@ -160,10 +161,22 @@ public class MonthView {
     }
 
     private void drawAssignment(Assignment assignment, int x, int y, int width, int height) {
-        g.setColor(new Color(assignment.getEventSpecificColor()));
+        Color color = new Color(assignment.getEventSpecificColor());
+        float colorBrightness = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[2];
+
+        g.setColor(color);
         g.fillRect(x, y, width, height);
+
+        String eventName = assignment.getEventName();
+        eventName = eventName.length() > 22 ? eventName.substring(0, 22) + "..." : eventName;
+
+        g.setColor(colorBrightness > .8f ? Color.BLACK : Color.WHITE);
+        g.drawString(eventName, x + horizontalDaySeparation, y + 20);
+
+        g.setColor(Color.BLACK);
+        g.fillRect(x, y, width, 4);
         g.setColor(Color.WHITE);
-        g.drawString(assignment.getEventName(), x + horizontalDaySeparation, y + 20);
+        g.fillRect(x, y, width * assignment.getEventProgress() / 100, 4);
     }
 
     /**

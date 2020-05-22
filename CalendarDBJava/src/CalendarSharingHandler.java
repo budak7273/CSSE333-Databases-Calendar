@@ -27,7 +27,9 @@ public class CalendarSharingHandler {
 	}
 	
 	public void followCalendar() {
-		int calendarID = Integer.parseInt(JOptionPane.showInputDialog("Enter the CalendarID to follow"));
+		String calendarIDstring = JOptionPane.showInputDialog("Enter the CalendarID to follow");
+		if (calendarIDstring == null) return;
+		int calendarID = Integer.parseInt(calendarIDstring);
 		
 		connect();
 		

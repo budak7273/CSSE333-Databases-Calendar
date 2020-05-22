@@ -32,12 +32,12 @@ public class CalendarDBJava extends JFrame {
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         
         dbConnectService = new DatabaseConnectionService(SERVER_NAME, DATABASE_NAME);
-        assignmentService = new AssignmentService(dbConnectService);
         userAccessControl = new UserAccessControl(dbConnectService);
 
         if (!userAccessControl.startupPrompt()) {   // User cancelled login/register screen
             System.exit(0);
         }
+        assignmentService = new AssignmentService(dbConnectService, userAccessControl.getUsername());
         monthView.setCurrentMonth();
         
         importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
@@ -166,9 +166,20 @@ public class CalendarDBJava extends JFrame {
         exportButton.setBounds(50,100,95,30);
         container.add(exportButton);
 
-        assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername());
-        monthView.updateAssignmentList(assignmentList);
+        JButton createNewAssignmentButton = new JButton("Add Assignment");
+        createNewAssignmentButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                System.out.println("Pressed");
+                if (assignmentService.createNewAssignmentPrompt()) {
+                    updateAndRedrawAssignments();
+                }
+            }
+        });
+        createNewAssignmentButton.setBounds(50,100,95,30);
+        container.add(createNewAssignmentButton);
 
+        updateAndRedrawAssignments();
         setVisible(true);   // Fixes buttons not rendering.
     }
 
@@ -184,7 +195,7 @@ public class CalendarDBJava extends JFrame {
     }
     
     private void updateAndRedrawAssignments() {
-    	assignmentList = assignmentService.getAllAssignmentsForUser(userAccessControl.getUsername());
+    	assignmentList = assignmentService.getAllAssignments();
         monthView.updateAssignmentList(assignmentList);
         repaint();
     }

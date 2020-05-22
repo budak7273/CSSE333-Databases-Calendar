@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class UserAccessControl {
     // TODO: flip this to true to not have to enter login credentials (for testing. uses the DemoUser/DemoPass account)
-    private static final boolean SKIP_LOGIN = true;
+    private static final boolean SKIP_LOGIN = false;
     // TODO: flip this to true to always have your passwords be correct (for resetting a lost password)
     private static final boolean UAC_GOD_MODE = false;
 

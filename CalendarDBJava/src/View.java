@@ -2,20 +2,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public abstract class View {
-
     protected static ArrayList<Assignment> assignmentList;
     protected ArrayList<AssignmentWrapper> assignmentLocationList = new ArrayList<>();
+    protected CalendarDBJava calendarDBJava;
 
-
-
-
-
+    public void setCalendarDBJava(CalendarDBJava calendarDBJava) {
+        this.calendarDBJava = calendarDBJava;
+    }
 
     public abstract void draw(Graphics g, Dimension d);
-
 
     public void updateAssignmentList(ArrayList<Assignment> allAssignments) {
         assignmentList = allAssignments;
@@ -40,10 +37,11 @@ public abstract class View {
         String body = String.format(
                 "%s\n" +
                         "%s%% complete\n" +
+                        "(ID# %d )\n" +
                         "Due: %s\n" +
                         "Type: %s\n" +
                         "Class Section ID: %d\n" +
-                        "Description:\n%s", assignment.getEventName(), assignment.getEventProgress(),
+                        "Description:\n%s", assignment.getEventName(), assignment.getEventProgress(), assignment.getAssignmentID(),
                 assignment.getEventDate().toLocaleString(), assignment.getEventType() == null ? "" : assignment.getEventType(),
                 assignment.getParentClassCalendarID(), assignment.getEventDescription());
 
@@ -59,10 +57,12 @@ public abstract class View {
             case 0:
                 return;
             case 1:
-                //TODO edit event
+                // TODO: update Event
                 break;
             case 2:
-                //TODO delete event
+                calendarDBJava.getAssignmentService().deleteAssignmentFromDB(assignment.getAssignmentID());
+                    calendarDBJava.updateAndRedrawAssignments();
+
                 break;
         }
     }

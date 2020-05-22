@@ -105,7 +105,7 @@ public class AssignmentService {
         eventType = JOptionPane.showInputDialog("Enter Assignment Type (Test, Quiz, etc.): ");
         if (eventType == null) return false;
 
-        HashMap<String, Integer> mapping = calendarSharingHandler.getFriendlyStringIDMapping(calendarSharingHandler.getAllAccessibleCalendars());
+        HashMap<String, Integer> mapping = calendarSharingHandler.getFriendlyStringIDMapping(calendarSharingHandler.listAllFollowedCalendars(false));
         String[] choices = {};
         String parentClassCalendarIDString = JOptionPane.showInputDialog(null, "Select an existing Calendar to add this to.", "Calendar Selection", JOptionPane.QUESTION_MESSAGE, null, mapping.keySet().toArray(choices), 1).toString();
         if (parentClassCalendarIDString == null) return false;
@@ -184,4 +184,45 @@ public class AssignmentService {
         return assignmentList;
     }
 
+    /**
+     * Deletes the specified assignment from the Database.
+     * @param assignmentID the AssigmentID for the Assignment to delete.
+     * @return true if delete was sucessful, false otherwise
+     */
+    public boolean deleteAssignmentFromDB(int assignmentID) {
+
+        System.out.printf("Deleting assignment ID %d...", assignmentID);
+
+        dbService.connect();
+        Connection con = dbService.getConnection();
+        CallableStatement deleteAssignmentsPS = null;
+        int returnedStatus = 5001;
+
+        try {
+            String insertAsQueryString = "{? = call delete_Assignment(?)}";
+            deleteAssignmentsPS = this.dbService.getConnection().prepareCall(insertAsQueryString);
+            int i = 1;
+            deleteAssignmentsPS.registerOutParameter(i++, Types.INTEGER);
+            deleteAssignmentsPS.setInt(i++, assignmentID);
+
+            deleteAssignmentsPS.execute();
+
+            returnedStatus = deleteAssignmentsPS.getInt(1);
+            System.out.println("\tdelete_Assignment returned " + returnedStatus);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (deleteAssignmentsPS != null) {
+                    System.out.println("Closing deleteAssignmentFromDB Connection");
+                    deleteAssignmentsPS.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return returnedStatus == 0;
+    }
 }

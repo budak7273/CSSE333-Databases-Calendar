@@ -21,6 +21,7 @@ public class CalendarDBJava extends JFrame {
 
     private ImportHandler importHandler;
     private CalendarSharingHandler sharingHandler;
+    private ClassSectionService classSectionService;
 
     private static final String SERVER_NAME = "golem.csse.rose-hulman.edu";
     private static final String DATABASE_NAME = "CalendarDB";
@@ -37,11 +38,11 @@ public class CalendarDBJava extends JFrame {
         dbConnectService = new DatabaseConnectionService(SERVER_NAME, DATABASE_NAME);
 
         userAccessControl = new UserAccessControl(dbConnectService);
-        userAccessControl.startupPrompt();
 
         if (!userAccessControl.startupPrompt()) {   // User cancelled login/register screen
             System.exit(0);
         }
+        classSectionService = new ClassSectionService(dbConnectService, userAccessControl.getUsername());
         sharingHandler = new CalendarSharingHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
         assignmentService = new AssignmentService(dbConnectService, userAccessControl.getUsername(), sharingHandler);
         monthView.setCurrentMonth();
@@ -85,6 +86,7 @@ public class CalendarDBJava extends JFrame {
         upcomingEventsView.addViewButtons(this);
         upcomingEventsView.hideViewButtons(this);
 
+        displayedView.setCalendarDBJava(this);
         displayedView.showViewButtons(this);
 
         container.setVisible(false);
@@ -210,6 +212,46 @@ public class CalendarDBJava extends JFrame {
         });
         createNewAssignmentButton.setBounds(50,100,95,30);
         container.add(createNewAssignmentButton);
+
+        JButton newClassSectionButton = new JButton("New Class Section");
+        newClassSectionButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                classSectionService.newClassSectionPrompt();
+            }
+        });
+        newClassSectionButton.setBounds(50,100,95,30);
+        container.add(newClassSectionButton);
+
+        JButton deleteClassSectionButton = new JButton("Delete Class Section");
+        deleteClassSectionButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                classSectionService.deleteClassSectionPrompt();
+            }
+        });
+        deleteClassSectionButton.setBounds(50,100,95,30);
+        container.add(deleteClassSectionButton);
+
+        JButton joinClassSectionButton = new JButton("Join Class Section");
+        joinClassSectionButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                classSectionService.joinClassSectionPrompt();
+            }
+        });
+        joinClassSectionButton.setBounds(50,100,95,30);
+        container.add(joinClassSectionButton);
+
+        JButton leaveClassSectionButton = new JButton("Leave Class Section");
+        leaveClassSectionButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                classSectionService.leaveClassSectionPrompt();
+            }
+        });
+        leaveClassSectionButton.setBounds(50,100,95,30);
+        container.add(leaveClassSectionButton);
     }
 
     private void swapViews() {
@@ -234,5 +276,13 @@ public class CalendarDBJava extends JFrame {
 
     public UpcomingEventsView getUpcomingEventsView() {
         return upcomingEventsView;
+    }
+
+    public CalendarSharingHandler getSharingHandler() {
+        return sharingHandler;
+    }
+
+    public AssignmentService getAssignmentService() {
+        return assignmentService;
     }
 }

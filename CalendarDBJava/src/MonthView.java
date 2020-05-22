@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-public class MonthView {
+public class MonthView extends View {
     private Font dayOfMonthFont = new Font("Helvetica", Font.PLAIN, 15);
     private Font monthTitleFont = new Font("Helvetica", Font.PLAIN, 30);
     private Color dayColor = Color.DARK_GRAY;
     private Color monthViewBorderColor = Color.BLACK;
-    private Color monthViewBackgroundColor = new Color(0x800000);
+    private Color viewBackgroundColor = new Color(0x800000);
     private Color monthViewDateColor = Color.WHITE;
     private int monthWidth = 1400;
     private int monthHeight = 800;
@@ -167,14 +167,16 @@ public class MonthView {
         }
     }
 
-    private void drawAssignment(Assignment assignment, int x, int y, int width, int height) {
-        Color color = new Color(assignment.getEventSpecificColor());
-        float colorBrightness = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[2];
+    private void drawAssignment(Assignment a, int x, int y, int width, int height) {
+        assignmentLocationList.add(new AssignmentWrapper(a, x, y, width, height));
 
-        g.setColor(color);
+        Color assignmentColor = new Color(a.getEventSpecificColor());
+        float colorBrightness = Color.RGBtoHSB(assignmentColor.getRed(), assignmentColor.getGreen(), assignmentColor.getBlue(), null)[2];
+
+        g.setColor(assignmentColor);
         g.fillRect(x, y, width, height);
 
-        String eventName = assignment.getEventName();
+        String eventName = a.getEventName();
         eventName = eventName.length() > 22 ? eventName.substring(0, 22) + "..." : eventName;
 
         g.setColor(colorBrightness > .8f ? Color.BLACK : Color.WHITE);
@@ -183,7 +185,7 @@ public class MonthView {
         g.setColor(Color.BLACK);
         g.fillRect(x, y, width, 4);
         g.setColor(Color.WHITE);
-        g.fillRect(x, y, width * assignment.getEventProgress() / 100, 4);
+        g.fillRect(x, y, width * a.getEventProgress() / 100, 4);
     }
 
     /**
@@ -198,7 +200,7 @@ public class MonthView {
         weeksInMonth = cal.getActualMaximum(Calendar.WEEK_OF_MONTH);
     }
 
-    public Color getMonthViewBackgroundColor() {
-        return monthViewBackgroundColor;
+    public Color getViewBackgroundColor() {
+        return viewBackgroundColor;
     }
 }

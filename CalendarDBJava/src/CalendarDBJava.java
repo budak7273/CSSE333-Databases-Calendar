@@ -16,6 +16,7 @@ public class CalendarDBJava extends JFrame {
 
     private MonthView monthView = new MonthView();
     private UpcomingEventsView upcomingEventsView = new UpcomingEventsView();
+    private View displayedView = monthView;
     private UserAccessControl userAccessControl;
 
     private ImportHandler importHandler;
@@ -24,20 +25,12 @@ public class CalendarDBJava extends JFrame {
     private static final String SERVER_NAME = "golem.csse.rose-hulman.edu";
     private static final String DATABASE_NAME = "CalendarDB";
 
-    private enum View {
-        MONTH_VIEW,
-        UPCOMING_EVENTS_VIEW
-    }
-
-    private View currentView = View.MONTH_VIEW;
-
-
     public CalendarDBJava() {
         // Setting Swing and JFrame related properties.
         super("CalendarDB UI");
         container = getContentPane();
         container.setLayout(new FlowLayout());
-        container.setBackground(monthView.getMonthViewBackgroundColor());
+        container.setBackground(displayedView.getViewBackgroundColor());
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         // Initializing various services
@@ -54,7 +47,6 @@ public class CalendarDBJava extends JFrame {
         monthView.setCurrentMonth();
         
         importHandler = new ImportHandler(SERVER_NAME, DATABASE_NAME, userAccessControl.getUsername());
-        
 
         // Close DB connection on exit
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -69,9 +61,7 @@ public class CalendarDBJava extends JFrame {
         container.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (currentView == View.UPCOMING_EVENTS_VIEW) {
-                    upcomingEventsView.processClick(e);
-                }
+                displayedView.processClick(e);
             }
         });
 
@@ -89,19 +79,13 @@ public class CalendarDBJava extends JFrame {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        switch (currentView) {
-            case MONTH_VIEW:
-                monthView.draw(g, getSize());
-                break;
-            case UPCOMING_EVENTS_VIEW:
-                upcomingEventsView.draw(g, getSize());
-        }
+        displayedView.draw(g, getSize());
     }
     
     private void updateAndRedrawAssignments() {
         ArrayList<Assignment> assignmentList = assignmentService.getAllAssignmentsSortedByDate();
-        monthView.updateAssignmentList(assignmentList);
-        upcomingEventsView.updateAssignmentList(assignmentList);
+        displayedView.updateAssignmentList(assignmentList);
+        container.setBackground(displayedView.getViewBackgroundColor());
         repaint();
     }
 
@@ -235,13 +219,10 @@ public class CalendarDBJava extends JFrame {
         switchViewButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                switch (currentView) {
-                    case MONTH_VIEW:
-                        currentView = View.UPCOMING_EVENTS_VIEW;
-                        break;
-                    case UPCOMING_EVENTS_VIEW:
-                        currentView = View.MONTH_VIEW;
-                        break;
+                if (monthView.equals(displayedView)) {
+                    displayedView = upcomingEventsView;
+                } else if (upcomingEventsView.equals(displayedView)) {
+                    displayedView = monthView;
                 }
                 updateAndRedrawAssignments();
             }

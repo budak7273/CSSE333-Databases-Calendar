@@ -7,13 +7,14 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Random;
 
 public class UserAccessControl {
-    // TODO: flip this to true to not have to enter login credentials (for testing)
-    private static final boolean SKIP_LOGIN = false;
-    // TODO: flip this to true to always have your passwords be correct (great for resetting a lost password)
+    // TODO: flip this to true to not have to enter login credentials (for testing. uses the DemoUser/DemoPass account)
+    private static final boolean SKIP_LOGIN = true;
+    // TODO: flip this to true to always have your passwords be correct (for resetting a lost password)
     private static final boolean UAC_GOD_MODE = false;
 
     private static final Random RANDOM = new SecureRandom();
@@ -84,7 +85,7 @@ public class UserAccessControl {
             username = JOptionPane.showInputDialog("Enter your username.");
             if (username == null) return false; // User Cancelled
 
-            password = JOptionPane.showInputDialog("Enter your password.");
+            password = simplePasswordPrompt("Enter your password.");
             if (password == null) return false;
         }
 
@@ -94,7 +95,7 @@ public class UserAccessControl {
             username = JOptionPane.showInputDialog("Enter your username.");
             if (username == null) return false;
 
-            password = JOptionPane.showInputDialog("Enter your password.");
+            password = simplePasswordPrompt("Enter your password.");
             if (password == null) return false;
         }
         return true; // Valid Login
@@ -130,7 +131,7 @@ public class UserAccessControl {
      * @return true if reset successful, false if a cancel button was pressed.
      */
     public boolean resetPasswordPrompt() {
-        password = JOptionPane.showInputDialog("Please enter your current password.");
+        password = simplePasswordPrompt("Please enter your current password.");
         if (password == null) return false;  // User cancelled
 
         if (validatePassword()) {
@@ -161,9 +162,9 @@ public class UserAccessControl {
     private String doublePasswordPrompt(String promptMessage) {
         String pw1, pw2;
         do {
-            pw1 = JOptionPane.showInputDialog(promptMessage);
+            pw1 = simplePasswordPrompt(promptMessage);
             if (pw1 == null) return null;
-            pw2 = JOptionPane.showInputDialog(promptMessage + " (Again)");
+            pw2 = simplePasswordPrompt(promptMessage + " (Again)");
             if (pw2 == null) return null;
 
             if (pw1.equals(pw2)) {
@@ -174,6 +175,29 @@ public class UserAccessControl {
 
         } while (true);
     }
+
+
+    /**
+     * Simple password prompt with obscured characters.
+     * Based on https://stackoverflow.com/questions/9924289/hide-data-using-joptionpane
+     * @param promptMessage message to display on the prompt window.
+     * @return the password, or null if cancel button is pressed.
+     */
+    private String simplePasswordPrompt(String promptMessage) {
+            JPasswordField jpf = new JPasswordField(30);
+            JLabel jl = new JLabel(promptMessage + "\n");
+            Box box = Box.createHorizontalBox();
+            box.add(jl);
+            box.add(jpf);
+            int x = JOptionPane.showConfirmDialog(null, box, "CalendarDB", JOptionPane.OK_CANCEL_OPTION);
+
+            if (x == JOptionPane.OK_OPTION) {
+                System.out.println(jpf.getText());
+                return jpf.getText();
+            }
+            return null;
+    }
+
 
 
     /**

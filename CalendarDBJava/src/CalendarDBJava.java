@@ -107,7 +107,7 @@ public class CalendarDBJava extends JFrame {
         uploadIcalButton.setBounds(50,100,95,30);
         container.add(uploadIcalButton);
 
-        JButton followCalendarButton = new JButton("Follow Calendar");
+        JButton followCalendarButton = new JButton("Join Calendar");
         followCalendarButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -119,7 +119,7 @@ public class CalendarDBJava extends JFrame {
         followCalendarButton.setBounds(50,100,95,30);
         container.add(followCalendarButton);
 
-        JButton unfollowCalendarButton = new JButton("Unfollow Calendar");
+        JButton unfollowCalendarButton = new JButton("Leave Calendar");
         unfollowCalendarButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -131,7 +131,7 @@ public class CalendarDBJava extends JFrame {
         unfollowCalendarButton.setBounds(50,100,95,30);
         container.add(unfollowCalendarButton);
 
-        JButton listFollowedCalendarsButton = new JButton("Followed Calendars");
+        JButton listFollowedCalendarsButton = new JButton("Joined Calendars");
         listFollowedCalendarsButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){

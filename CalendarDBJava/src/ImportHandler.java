@@ -106,7 +106,7 @@ public class ImportHandler {
 			int colorInt = defaultEventColor; //Converting between X11 color name necessary //(event.getColor() == null) ? defaultEventColor : event.getColor().getValue();
 			paramQueryPS.setInt(5, colorInt); //color
 			paramQueryPS.setInt(6, parentClassCalendarID);//for testing, use ID#2
-			paramQueryPS.setInt(7, -1); //-1 is the ID# of the default class section (unset) since this field isn't populated on import
+			paramQueryPS.setInt(7, -1); // -1 indicates no (null) class section id (class section is only for downstream duplication)
 			paramQueryPS.setInt(8, importSourceID); //for testing, use ID#1
 			paramQueryPS.setString(9, event.getDescription().getValue()); //description
 			

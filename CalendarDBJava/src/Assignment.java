@@ -1,3 +1,4 @@
+import java.util.Comparator;
 import java.util.Date;
 
 import biweekly.component.VEvent;
@@ -79,5 +80,13 @@ public class Assignment {
     public String toString() {
         return String.format("Assignment(Name=%s, Date=%s)", this.EventName, this.EventDate);
 
+    }
+
+
+    public static class ComparatorByDate implements Comparator<Assignment> {
+        @Override
+        public int compare(Assignment o1, Assignment o2) {
+            return o1.getEventDate().compareTo(o2.EventDate);
+        }
     }
 }

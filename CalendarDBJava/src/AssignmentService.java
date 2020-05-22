@@ -7,7 +7,6 @@ import java.util.Date;
 public class AssignmentService {
     private DatabaseConnectionService dbService;
     private String username;
-    private ArrayList<Assignment> assignmentList;
 
     public AssignmentService(DatabaseConnectionService dbService, String username) {
         this.dbService = dbService;
@@ -62,7 +61,6 @@ public class AssignmentService {
         
         return assignments;
     }
-
 
     /**
      * prompts the user to create a new assignment, then adds it to the database.
@@ -170,4 +168,11 @@ public class AssignmentService {
         }
         return returnedStatus == 0;
     }
+
+    public ArrayList<Assignment> getAllAssignmentsSortedByDate() {
+        ArrayList<Assignment> assignmentList = getAllAssignments();
+        getAllAssignments().sort(new Assignment.ComparatorByDate());
+        return assignmentList;
+    }
+
 }
